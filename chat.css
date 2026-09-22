@@ -1,0 +1,49 @@
+.chat-widget { position: fixed; z-index: 40; right: 22px; bottom: 20px; width: min(410px, calc(100vw - 32px)); height: min(620px, calc(100dvh - 40px)); display: flex; flex-direction: column; background: #fff; border: 1px solid #dce6d5; border-radius: 18px; box-shadow: 0 12px 48px #17342625; overflow: hidden; }
+.chat-widget > :not(.chat-history) { flex-shrink: 0; }
+.chat-launcher { position: fixed; z-index: 40; right: 22px; bottom: 20px; display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 16px; background: var(--green); color: #fff; font-size: 13px; font-weight: 600; box-shadow: 0 8px 26px #17342626; }
+.chat-launcher > span:first-child { color: #d7efb9; font-size: 22px; }
+.chat-header { display: flex; justify-content: space-between; gap: 8px; padding: 16px 18px 13px; border-bottom: 1px solid var(--border); }
+.chat-eyebrow { font-size: 9px; letter-spacing: 1.5px; color: #78916c; }
+.chat-header h2 { font-size: 20px; margin: 6px 0; letter-spacing: -.6px; }
+.chat-header h2 span { color: #8aad66; }
+.chat-header p, .chat-bottom { color: var(--muted); font-size: 11px; }
+.chat-notice { padding: 10px 26px; background: #edf4e5; color: #537045; font-size: 11px; }
+.chat-history { flex: 1; overflow-y: auto; overscroll-behavior: contain; min-height: 0; padding: 16px; display: flex; flex-direction: column; gap: 16px; background: #f8faf6; }
+.chat-message { flex-shrink: 0; }
+.chat-message { max-width: 92%; align-self: flex-start; padding: 15px 17px; background: white; border: 1px solid #e0e8da; border-radius: 3px 15px 15px; }
+.chat-message.user { align-self: flex-end; background: #185c47; border-color: #185c47; color: white; border-radius: 15px 3px 15px 15px; }
+.chat-message > small { display: block; font-size: 10px; opacity: .7; margin-bottom: 7px; }
+.chat-message p { white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; font-size: 12px; }
+.chat-suggestions { display: flex; gap: 7px; flex-wrap: wrap; padding: 12px 24px 0; max-height: 100px; overflow-y: auto; }
+.chat-suggestions button { padding: 7px 10px; border: 1px solid #dbe6d2; background: #f4f8ed; border-radius: 20px; font-size: 11px; color: #42633d; }
+.chat-composer { display: flex; align-items: flex-end; gap: 10px; padding: 14px 24px 8px; }
+.chat-composer textarea { flex: 1; min-width: 0; resize: vertical; max-height: 140px; padding: 12px; border: 1px solid #d9e4d4; border-radius: 10px; background: #fdfefb; font-size: 13px; }
+.chat-bottom { display: flex; justify-content: space-between; gap: 10px; padding: 5px 24px 18px; }
+.chat-bottom button { font-size: 11px; }
+.chat-error { margin: 12px 24px 0; }
+.chat-report { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+.chat-report-row { display: grid; grid-template-columns: 1fr auto; gap: 5px; font-size: 11px; margin: 10px 0; }
+.chat-report-meter { grid-column: 1 / -1; height: 6px; border-radius: 5px; background: #eef2e9; overflow: hidden; }
+.chat-report-meter i { display: block; height: 100%; }
+.chat-report button { font-size: 11px; margin: 10px 12px 0 0; }
+@media (max-width: 760px) {
+  .chat-widget { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); width: calc(100vw - 24px); height: min(560px, 76dvh); }
+  .chat-launcher { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); max-width: calc(100vw - 24px); }
+  .main-nav { flex-wrap: wrap; }
+  #open-chat { flex: 1 1 100%; background: #edf4e5; }
+  .chat-header { padding: 18px; }
+  .chat-header h2 { font-size: 21px; }
+  .chat-notice { padding: 9px 18px; }
+  .chat-history { padding: 16px; }
+  .chat-suggestions { padding: 10px 16px 0; }
+  .chat-composer { padding: 12px 16px 8px; gap: 7px; }
+  .chat-composer textarea { font-size: 16px; }
+  .chat-composer .button { padding: 12px; font-size: 12px; }
+  .chat-bottom { padding: 5px 16px 14px; font-size: 10px; }
+}
+@media (max-height: 600px) {
+  .chat-widget { height: calc(100dvh - 24px); }
+  .chat-eyebrow, .chat-header p, .chat-notice, .chat-bottom > span { display: none; }
+  .chat-header, .chat-composer { padding: 10px 14px; }
+  .chat-suggestions { max-height: 45px; }
+}

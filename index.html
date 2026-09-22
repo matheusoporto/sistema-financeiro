@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#185c47">
+  <meta name="description" content="Orçaviva: seu dinheiro, com mais clareza. Organize despesas, parcelas e orçamentos em um só lugar.">
+  <title>Orçaviva — Seu dinheiro, com mais clareza</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23185c47'/%3E%3Cg transform='translate(7 7) scale(1.08)'%3E%3Cpath d='M18.5 10a7 7 0 1 1-5-4.8' fill='none' stroke='%23d7f2bb' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z' fill='%23d7f2bb'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="auth.css">
+  <link rel="stylesheet" href="tour.css">
+  <link rel="stylesheet" href="chat.css">
+  <script src="finance.js" defer></script>
+  <script src="api.js" defer></script>
+  <script src="tour.js" defer></script>
+  <script src="chat.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <section class="auth-screen" id="auth-screen" aria-label="Acesso ao orçaviva">
+    <div class="auth-story">
+      <div class="auth-brand"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18.5 10a7 7 0 1 1-5-4.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z" fill="currentColor"/></svg></span><span>orçaviva.</span></div>
+      <div class="auth-story-content"><span class="auth-eyebrow">SEU DINHEIRO, COM MAIS CLAREZA</span><h1>Mais espaço<br>para os seus<br><em>próximos planos.</em></h1><p>Um lugar para organizar seus gastos, acompanhar suas parcelas e deixar a vida mais leve.</p><div class="auth-illustration" aria-hidden="true"><div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div><div class="auth-float-card"><span class="auth-card-icon">✳</span><div>Um passo de cada vez.<strong>Você no controle.</strong></div><span class="auth-card-check">✓</span></div><span class="auth-small-star">✧</span></div></div>
+      <p class="auth-story-footer">Pequenos hábitos. Novas possibilidades.</p>
+    </div>
+    <div class="auth-panel"><div class="auth-panel-inner">
+      <div class="auth-mobile-brand">orçaviva<span>.</span></div>
+      <div class="auth-tabs" role="group" aria-label="Entrar ou criar conta"><button type="button" class="active" id="show-login" aria-pressed="true">Entrar</button><button type="button" id="show-register" aria-pressed="false">Criar conta</button></div>
+      <div class="auth-intro"><span class="auth-greeting">SEU ESPAÇO PESSOAL</span><h2 id="auth-title">Bom te ver por aqui.</h2><p id="auth-description">Entre na sua conta e retome seus planos.</p></div>
+      <p class="auth-message" id="auth-message" role="status" hidden></p>
+      <form id="login-form" class="auth-form"><label class="form-field">Nome de usuário<input id="login-username" name="username" autocomplete="username" placeholder="Seu usuário" minlength="3" maxlength="30" required autocapitalize="none" spellcheck="false"></label><label class="form-field">Senha<div class="password-field"><input id="login-password" name="password" type="password" autocomplete="current-password" placeholder="Sua senha" maxlength="128" required><button type="button" class="password-toggle" data-password="login-password" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button></div></label><button type="submit" class="button button-primary auth-submit" id="login-submit">Entrar na minha conta <span aria-hidden="true">→</span></button></form>
+      <button type="button" class="text-button forgot-link" id="show-forgot">Esqueci minha senha</button>
+      <form id="register-form" class="auth-form" hidden>
+        <label class="form-field">Como podemos chamar você?<input id="register-name" name="name" autocomplete="name" placeholder="Seu nome" maxlength="60" required></label>
+        <label class="form-field">E-mail<input id="register-email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" maxlength="254" required autocapitalize="none" spellcheck="false"><small>Usaremos este endereço para recuperar sua senha.</small></label>
+        <label class="form-field">Nome de usuário<input id="register-username" name="username" autocomplete="username" placeholder="Ex.: matheus.silva" pattern="[A-Za-z0-9._\-]{3,30}" minlength="3" maxlength="30" required autocapitalize="none" spellcheck="false"><small>De 3 a 30 letras, números, pontos, traços ou sublinhados.</small></label>
+        <label class="form-field">Crie uma senha<div class="password-field"><input id="register-password" name="password" type="password" autocomplete="new-password" placeholder="8 caracteres + 1 especial" minlength="8" maxlength="128" required aria-describedby="register-password-help"><button type="button" class="password-toggle" data-password="register-password" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button></div><small id="register-password-help">Pelo menos 8 caracteres e 1 especial, como !, @ ou #.</small></label>
+        <label class="form-field">Confirme a senha<input id="register-confirm" name="confirmation" type="password" autocomplete="new-password" placeholder="Digite a senha novamente" minlength="8" maxlength="128" required></label>
+        <button type="submit" class="button button-primary auth-submit" id="register-submit">Criar minha conta <span aria-hidden="true">→</span></button>
+      </form>
+      <form id="forgot-form" class="auth-form" hidden>
+        <label class="form-field">E-mail da sua conta<input id="forgot-email" name="email" type="email" autocomplete="email" placeholder="voce@exemplo.com" maxlength="254" required autocapitalize="none" spellcheck="false"></label>
+        <button type="submit" class="button button-primary auth-submit" id="forgot-submit">Enviar link de recuperação →</button>
+      </form>
+      <form id="reset-form" class="auth-form" hidden>
+        <label class="form-field">Nova senha<div class="password-field"><input id="reset-password" name="password" type="password" autocomplete="new-password" placeholder="8 caracteres + 1 especial" minlength="8" maxlength="128" required aria-describedby="reset-password-help"><button type="button" class="password-toggle" data-password="reset-password" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button></div><small id="reset-password-help">Pelo menos 8 caracteres e 1 especial, como !, @ ou #.</small></label>
+        <label class="form-field">Confirme a nova senha<input id="reset-confirm" name="confirmation" type="password" autocomplete="new-password" placeholder="Digite a nova senha novamente" minlength="8" maxlength="128" required></label>
+        <button type="submit" class="button button-primary auth-submit" id="reset-submit">Salvar nova senha →</button>
+        <button type="button" class="text-button" id="reset-resend">Preciso de um novo link</button>
+      </form>
+      <button type="button" class="text-button auth-back" id="back-login" hidden>← Voltar para entrar</button>
+      <div class="auth-server-help" id="auth-server-help" hidden><strong>Seu painel agora tem uma conta.</strong><p>Inicie o servidor com <code>npm start</code> na pasta <code>sistema-financeiro</code> e acesse <a href="http://localhost:3000">http://localhost:3000</a>.</p></div>
+      <div class="legacy-help" id="legacy-help" hidden><p>Encontramos os gastos da versão anterior neste navegador. Baixe o arquivo e use “Importar backup” depois de entrar na sua conta.</p><button type="button" class="button button-outline" id="legacy-export">Baixar meus gastos anteriores</button></div>
+      <p class="auth-footnote"><span data-icon="shield"></span>Seus gastos organizados, em todos os seus dispositivos.</p>
+    </div></div>
+  </section>
+  <div id="app-shell" hidden inert>
+  <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+  <aside class="sidebar" aria-label="Menu principal">
+    <a class="brand" href="#" aria-label="orçaviva, visão geral"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18.5 10a7 7 0 1 1-5-4.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z" fill="currentColor"/></svg></span><span>orçaviva<span class="brand-dot">.</span></span></a>
+    <div class="workspace-label"><span class="workspace-avatar" data-icon="wallet"></span><span><span id="account-name">Meu espaço pessoal</span><small id="account-username">Um passo de cada vez</small></span><span class="workspace-dot"></span></div>
+    <p class="nav-caption">ACOMPANHE</p>
+    <nav class="main-nav">
+      <button class="nav-item" id="open-chat"><span data-icon="sparkles"></span><span>Conversar com Orçaviva</span></button>
+      <button class="nav-item active" data-view="overview"><span data-icon="dashboard"></span><span>Visão geral</span></button>
+      <button class="nav-item" data-view="expenses"><span data-icon="receipt"></span><span>Minhas despesas</span><span id="expense-count" class="nav-count">0</span></button>
+      <button class="nav-item" data-view="planning"><span data-icon="calendar"></span><span>Planejamento</span></button>
+    </nav>
+    <p class="nav-caption tools-caption">FERRAMENTAS</p>
+    <nav class="tools-nav">
+      <button class="nav-item" id="replay-tour" title="Rever tour" aria-label="Rever tour"><span aria-hidden="true">?</span><span>Rever tour</span></button>
+      <button class="nav-item" id="export-backup" aria-label="Exportar backup dos dados" title="Exportar backup"><span data-icon="download"></span><span>Exportar backup</span></button>
+      <button class="nav-item" id="import-backup" aria-label="Importar backup dos dados" title="Importar backup"><span data-icon="upload"></span><span>Importar backup</span></button>
+      <button class="nav-item" id="logout" aria-label="Sair da conta" title="Sair da conta"><span data-icon="logout"></span><span>Sair da conta</span></button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="sidebar-note"><span class="note-icon" data-icon="sprout"></span><strong>Mais tranquilidade.<br>Uma compra por vez.</strong><p>Cuidar do seu dinheiro também é cuidar de você.</p><span class="note-decoration" aria-hidden="true">✳</span></div>
+      <div class="local-note"><span data-icon="shield"></span><span>Seu espaço pessoal<br><strong>sincronizado com sua conta</strong></span></div>
+    </div>
+  </aside>
+
+  <main class="main-content" id="main-content">
+    <header class="page-header">
+      <div><div class="eyebrow">UM POUCO DE ORGANIZAÇÃO, MAIS LEVEZA</div><h1 id="page-title">Seu mês, sob controle<span>.</span></h1><p id="page-description">Cada gasto no seu lugar. Mais espaço para os seus planos.</p></div>
+      <div class="header-actions"><span class="save-status" id="save-status" role="status"><span class="status-dot"></span>Conectando à sua conta</span><button class="button button-primary" id="add-expense"><span data-icon="plus"></span>Novo gasto</button></div>
+    </header>
+
+    <div class="notice error-notice" id="storage-warning" role="alert" hidden></div>
+    <div class="notice migration-notice" id="migration-notice" hidden><span>Encontramos gastos anteriores neste navegador. Você pode trazê-los para esta conta.</span><button class="text-button" id="migrate-local">Importar gastos anteriores</button></div>
+    <div class="notice" id="email-reminder" hidden><span><strong>Deixe sua conta mais completa.</strong> Cadastre um e-mail para recuperar sua senha quando precisar.</span><button class="text-button" id="add-account-email">Adicionar e-mail</button></div>
+    <div class="notice demo-notice" id="demo-notice" hidden><span><strong>Você está na demonstração.</strong> Estes gastos são fictícios. Explore à vontade!</span><button class="text-button" id="exit-demo">Usar meus dados <span data-icon="arrow-right"></span></button></div>
+
+    <section class="month-navigation" aria-label="Selecionar mês">
+      <div class="year-selector"><button class="icon-button" id="previous-year" aria-label="Ano anterior"><span data-icon="chevron-left"></span></button><strong id="selected-year"></strong><button class="icon-button" id="next-year" aria-label="Próximo ano"><span data-icon="chevron-right"></span></button></div>
+      <div class="month-tabs" id="month-tabs" role="tablist" aria-label="Meses do ano"></div>
+      <button class="today-button" id="current-month">Mês atual</button>
+    </section>
+
+    <div class="period-heading"><h2 id="period-title"></h2><span id="period-subtitle">Vamos fazer este mês valer a pena.</span><button class="text-button" id="set-budget"><span data-icon="sliders"></span>Ajustar orçamento</button></div>
+
+    <section class="summary-grid" id="summary-grid" aria-label="Resumo financeiro do mês">
+      <article class="summary-card total-card"><div class="summary-label">Gastos do mês <span class="metric-icon" data-icon="wallet"></span></div><strong class="metric-value" id="metric-total">R$ 0,00</strong><div class="metric-detail" id="metric-comparison"></div><span class="metric-spark" aria-hidden="true"><svg viewBox="0 0 115 40"><path d="M2 34 18 25 29 29 44 12 60 18 73 7 89 14 112 3"/></svg></span></article>
+      <article class="summary-card"><div class="summary-label">Parcelas neste mês <span class="metric-icon lavender" data-icon="layers"></span></div><strong class="metric-value" id="metric-installments">R$ 0,00</strong><div class="metric-detail" id="metric-installment-detail">Nenhuma parcela por aqui</div></article>
+      <article class="summary-card"><div class="summary-label">Maior compra do mês <span class="metric-icon peach" data-icon="shopping-bag"></span></div><strong class="metric-value" id="metric-largest">R$ 0,00</strong><div class="metric-detail truncate" id="metric-largest-name">Seus gastos aparecerão aqui</div></article>
+      <article class="summary-card budget-card"><div class="summary-label">Orçamento disponível <span class="metric-icon sage" data-icon="target"></span></div><strong class="metric-value" id="metric-budget">A definir</strong><div class="budget-progress"><span id="budget-progress-bar"></span></div><div class="metric-detail" id="metric-budget-detail">Defina uma meta para o seu mês</div></article>
+    </section>
+
+    <section class="welcome-banner" id="welcome-banner" hidden><div class="welcome-icon" data-icon="sparkles"></div><div><strong>Seu próximo passo começa aqui.</strong><p>Adicione seu primeiro gasto ou explore um exemplo para conhecer o orçaviva.</p></div><button class="button button-light" id="start-demo">Explorar demonstração <span data-icon="arrow-right"></span></button></section>
+
+    <section class="chart-grid" id="chart-grid" aria-label="Gráficos do mês">
+      <article class="panel trend-panel"><div class="panel-heading"><div><h3>O ritmo do seu mês</h3><p>Seus gastos acumulados, dia após dia.</p></div><span class="chart-key"><i></i>Gastos</span></div><div class="trend-chart" id="trend-chart"></div><div class="chart-insight" id="chart-insight"><span data-icon="sparkles"></span><p>Cada lançamento ajuda você a enxergar melhor seus hábitos.</p></div></article>
+      <article class="panel category-panel"><div class="panel-heading"><div><h3>Para onde foi?</h3><p>Um olhar sobre suas categorias.</p></div><span class="subtle-icon" data-icon="pie"></span></div><div class="category-chart-content"><div class="donut-wrap"><div class="donut-chart" id="donut-chart" role="img" aria-label="Nenhum gasto"><div class="donut-center"><span id="donut-count">0</span><small id="donut-label">categorias</small></div></div></div><div class="category-legend" id="category-legend"></div></div><div class="category-insight" id="category-insight">Um mês em branco, cheio de possibilidades.</div></article>
+    </section>
+
+    <section class="panel transactions-panel" id="transactions-panel" aria-labelledby="transactions-title">
+      <div class="panel-heading transactions-heading"><div><h3 id="transactions-title">Seus gastos, de perto <span class="count-badge" id="transaction-count">0</span></h3><p>Os pequenos detalhes que fazem a diferença no fim do mês.</p></div><button class="button button-outline button-small" id="export-csv"><span data-icon="download"></span>Exportar CSV</button></div>
+      <div class="transaction-toolbar"><div class="search-field"><span data-icon="search"></span><input type="search" id="search-expenses" placeholder="Buscar uma compra..." aria-label="Buscar compras pelo nome ou observação" autocomplete="off"></div><div class="filter-scroll" id="category-filters" role="group" aria-label="Filtrar por tipo de gasto"></div><button class="icon-button filter-reset" id="clear-filters" title="Limpar busca e filtros" aria-label="Limpar busca e filtros" hidden><span data-icon="filter-x"></span></button></div>
+      <div class="table-scroll"><table class="expense-table"><thead><tr><th scope="col"><button class="table-sort" data-sort="name">Compra <span data-icon="sort"></span></button></th><th scope="col">Categoria</th><th scope="col"><button class="table-sort" data-sort="date">Data <span data-icon="sort"></span></button></th><th scope="col">Pagamento</th><th scope="col" class="amount-column"><button class="table-sort" data-sort="amount">Valor <span data-icon="sort"></span></button></th><th scope="col"><span class="sr-only">Ações</span></th></tr></thead><tbody id="expense-rows"></tbody></table></div>
+      <div class="empty-state" id="empty-state" hidden><span class="empty-icon" data-icon="receipt"></span><h3>Um mês pronto para começar</h3><p>Do cafezinho à próxima conquista, organize tudo por aqui.</p><button class="button button-primary" id="empty-add"><span data-icon="plus"></span>Adicionar meu primeiro gasto</button></div>
+      <div class="table-footer"><span id="table-result-count">Nenhum gasto neste mês</span><div class="pagination" id="pagination"></div><span>Total filtrado <strong id="filtered-total">R$ 0,00</strong></span></div>
+    </section>
+
+    <section class="planning-section" id="planning-section" hidden aria-label="Planejamento dos próximos meses"><div class="section-intro"><div><h3>Mais clareza para o que vem aí.</h3><p>Veja as parcelas já comprometidas e planeje seus próximos seis meses.</p></div><span class="tag tag-green">Visão dos próximos 6 meses</span></div><div class="planning-grid" id="planning-grid"></div><article class="panel commitments-panel"><div class="panel-heading"><div><h3>Compras que continuam com você</h3><p>Parcelamentos com valores a pagar a partir do mês selecionado.</p></div><span class="subtle-icon" data-icon="layers"></span></div><div id="commitments-list"></div></article></section>
+
+    <footer class="page-footer"><span><span class="footer-brand">orçaviva.</span> Mais clareza. Mais tranquilidade.</span><span><span data-icon="lock"></span> Salvo automaticamente · Na sua conta, em todos os dispositivos</span></footer>
+  </main>
+
+  <dialog class="modal expense-modal" id="expense-dialog" aria-labelledby="expense-dialog-title"><form id="expense-form"><div class="modal-heading"><div><span class="modal-eyebrow">CADA DETALHE CONTA</span><h2 id="expense-dialog-title">Adicionar um gasto</h2><p id="expense-dialog-description">Deixe registrado e siga com o seu dia.</p></div><button type="button" class="icon-button modal-close" data-close="expense-dialog" aria-label="Fechar"><span data-icon="x"></span></button></div><div class="modal-body"><input type="hidden" id="expense-id"><label class="form-field">Nome da compra<input id="expense-name" name="name" placeholder="Ex.: Compras da semana" maxlength="100" required autocomplete="off"></label><div class="form-row"><label class="form-field">Valor total da compra<div class="currency-input"><span>R$</span><input id="expense-amount" name="amount" placeholder="0,00" inputmode="decimal" required autocomplete="off"></div></label><label class="form-field">Categoria<select id="expense-category" name="category" required><option value="">Selecione uma categoria</option></select></label></div><label class="form-field">Data da compra / primeira parcela<input type="date" id="expense-date" name="date" min="0001-01-01" max="9999-12-31" required></label><div class="installment-toggle"><span><strong>Esta compra foi parcelada?</strong><small>As parcelas vão para os próximos meses automaticamente.</small></span><label class="switch"><input type="checkbox" id="expense-is-installment" aria-label="Compra parcelada"><span></span></label></div><div class="installment-fields" id="installment-fields" hidden><label class="form-field">Número de parcelas<input type="number" id="expense-installments" name="installments" min="2" max="120" step="1" value="2"></label></div><div class="installment-preview" id="installment-preview" aria-live="polite" hidden></div><label class="form-field">Observação <span class="optional">(opcional)</span><textarea id="expense-notes" name="notes" placeholder="Algo que você queira lembrar depois..." maxlength="500" rows="2"></textarea></label><p class="form-error" id="expense-error" role="alert" hidden></p></div><div class="modal-footer"><span><span data-icon="shield"></span>Seus dados ficam com você.</span><button type="button" class="button button-outline" data-close="expense-dialog">Cancelar</button><button type="submit" class="button button-primary" id="save-expense"><span data-icon="check"></span>Salvar gasto</button></div></form></dialog>
+
+  <dialog class="modal small-modal" id="budget-dialog" aria-labelledby="budget-dialog-title"><form id="budget-form"><div class="modal-heading"><div><span class="modal-eyebrow">UM PLANO PARA O SEU MÊS</span><h2 id="budget-dialog-title">Definir orçamento</h2><p id="budget-month-label"></p></div><button type="button" class="icon-button" data-close="budget-dialog" aria-label="Fechar"><span data-icon="x"></span></button></div><div class="modal-body"><label class="form-field">Quanto você pretende gastar?<div class="currency-input"><span>R$</span><input id="budget-amount" inputmode="decimal" placeholder="0,00" required></div></label><p class="form-help">O orçamento considera todas as compras e parcelas deste mês. Você pode ajustá-lo quando precisar.</p><p class="form-error" id="budget-error" role="alert" hidden></p></div><div class="modal-footer"><button type="button" class="text-button danger-text" id="remove-budget">Remover limite</button><button type="submit" class="button button-primary">Salvar orçamento</button></div></form></dialog>
+
+  <dialog class="modal small-modal" id="confirm-dialog" aria-labelledby="confirm-title"><div class="modal-heading"><div><h2 id="confirm-title"></h2><p id="confirm-description"></p></div><button type="button" class="icon-button" data-close="confirm-dialog" aria-label="Fechar"><span data-icon="x"></span></button></div><div class="modal-footer"><button type="button" class="button button-outline" data-close="confirm-dialog">Cancelar</button><button type="button" class="button button-danger" id="confirm-action">Confirmar</button></div></dialog>
+  <input type="file" id="import-file" accept=".json,application/json" hidden>
+  <section class="chat-widget" id="chat-dialog" aria-labelledby="chat-title" hidden>
+    <header class="chat-header"><div><span class="chat-eyebrow">SEU ASSISTENTE FINANCEIRO</span><h2 id="chat-title">Converse com o Orçaviva<span>.</span></h2><p>Chat de teste · Sem WhatsApp ou IA externa</p></div><button type="button" class="icon-button" id="close-chat" aria-label="Minimizar conversa" title="Minimizar conversa">−</button></header>
+    <div class="chat-notice">Os lançamentos são salvos na sua conta real. Você pode corrigir ou desfazer pelo chat.</div>
+    <div class="chat-history" id="chat-history" role="log" aria-label="Mensagens da conversa" aria-live="polite"></div>
+    <div class="chat-suggestions" id="chat-suggestions"></div>
+    <p class="chat-error form-error" id="chat-error" role="alert" hidden></p>
+    <form class="chat-composer" id="chat-form"><label class="sr-only" for="chat-input">Sua mensagem</label><textarea id="chat-input" rows="2" maxlength="1000" placeholder="Ex.: Gastei 85,90 no mercado via Pix" required></textarea><button type="submit" class="button button-primary" id="chat-send">Enviar →</button></form>
+    <div class="chat-bottom"><span id="chat-status" role="status">No crédito, a primeira fatura vai para o próximo mês.</span><button type="button" class="text-button" id="chat-refresh">Atualizar conversa</button></div>
+  </section>
+  <button type="button" class="chat-launcher" id="restore-chat" aria-controls="chat-dialog" aria-expanded="false" hidden><span aria-hidden="true">✦</span><span>Conversar com Orçaviva</span><span aria-hidden="true">⌃</span></button>
+  <dialog class="modal small-modal" id="account-email-dialog" aria-labelledby="account-email-title">
+    <form id="account-email-form"><div class="modal-heading"><div><h2 id="account-email-title">Seu e-mail de recuperação</h2><p>Confirme sua senha atual para vincular o endereço à sua conta.</p></div><button type="button" class="icon-button" data-close="account-email-dialog" aria-label="Fechar">×</button></div>
+    <div class="modal-body"><label class="form-field">E-mail<input id="account-email" type="email" autocomplete="email" maxlength="254" required placeholder="voce@exemplo.com"></label><label class="form-field">Senha atual<input id="account-email-password" type="password" autocomplete="current-password" maxlength="128" required></label><p class="form-error" id="account-email-error" role="alert" hidden></p></div>
+    <div class="modal-footer"><button type="button" class="button button-outline" data-close="account-email-dialog">Agora não</button><button type="submit" class="button button-primary" id="account-email-submit">Salvar e-mail</button></div></form>
+  </dialog>
+  <dialog class="modal tour-modal" id="tour-dialog" aria-labelledby="tour-title" aria-describedby="tour-description">
+    <div class="tour-top"><span class="modal-eyebrow">BEM-VINDO AO ORÇAVIVA</span><button type="button" class="text-button" id="tour-skip">Pular tour</button></div>
+    <div class="tour-preview" id="tour-preview" aria-hidden="true"></div>
+    <div class="tour-copy" aria-live="polite" aria-atomic="true"><span class="tour-counter" id="tour-counter"></span><h2 id="tour-title" tabindex="-1"></h2><p id="tour-description"></p></div>
+    <p class="form-error tour-error" id="tour-error" role="alert" hidden></p>
+    <div class="tour-actions"><button type="button" class="text-button" id="tour-back">Voltar</button><div class="tour-dots" id="tour-dots" aria-hidden="true"></div><button type="button" class="button button-primary" id="tour-next">Próximo →</button></div>
+    <button type="button" class="text-button tour-create" id="tour-create" hidden>Concluir e criar meu primeiro gasto →</button>
+    <p class="tour-footnote">É só uma apresentação. Você pode rever pelo menu.</p>
+  </dialog>
+  </div>
+  <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+  <noscript><div class="noscript-warning">Ative o JavaScript no navegador para usar o orçaviva. Entre na sua conta para acessar os dados salvos no servidor.</div></noscript>
+</body>
+</html>

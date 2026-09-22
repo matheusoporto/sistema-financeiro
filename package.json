@@ -1,0 +1,18 @@
+{
+  "name": "orcaviva",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Controle financeiro pessoal com contas, categorias e parcelas",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "scripts": {
+    "start": "node server.cjs",
+    "test": "node --test finance.test.js server.test.cjs api.test.cjs mailer.test.cjs chat.test.cjs",
+    "test:browser": "node browser.test.cjs",
+    "check:email": "node check-email.cjs"
+  },
+  "dependencies": {
+    "nodemailer": "^10.0.7"
+  }
+}

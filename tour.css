@@ -1,0 +1,53 @@
+.forgot-link { display: block; margin: 17px 0 0 auto; font-size: 12px; }
+.auth-back { margin-top: 22px; }
+#email-reminder { gap: 16px; flex-wrap: wrap; }
+#replay-tour > span:first-child { display: grid; place-items: center; flex-shrink: 0; width: 18px; height: 18px; border: 1.5px solid currentColor; border-radius: 50%; font-size: 12px; font-weight: 700; }
+.tour-modal { width: min(520px, calc(100vw - 32px)); padding: 0; }
+.tour-top { display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 23px 28px 20px; }
+.tour-top .modal-eyebrow { margin: 0; font-size: 9px; letter-spacing: 1.5px; }
+#tour-skip { white-space: nowrap; font-size: 12px; }
+.tour-preview { display: grid; place-items: center; min-height: 218px; padding: 24px; background: radial-gradient(ellipse at top right, #d8eac6, transparent 70%), #f0f5e9; }
+.tour-receipt { width: min(280px, 100%); display: grid; gap: 13px; background: white; border: 1px solid #e0e8db; border-radius: 13px; padding: 20px; box-shadow: 0 8px 20px #185c4709; }
+.tour-pill { display: inline-block; width: fit-content; padding: 5px 9px; border-radius: 6px; background: #e8f0df; color: #38634a; font-size: 10px; font-weight: 650; }
+.tour-receipt > small { font-size: 9px; letter-spacing: 1px; color: #77836f; }
+.tour-receipt > strong { font-size: 19px; letter-spacing: -.5px; }
+.tour-preview-row { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; }
+.tour-check { display: block; text-align: center; color: #f5f8ed; background: var(--green); padding: 8px; font-size: 11px; border-radius: 6px; }
+.tour-example { width: 100%; text-align: center; }
+.tour-example p { margin-top: 14px; font-size: 11px; color: #687b6e; }
+.tour-months { display: flex; justify-content: center; gap: 10px; margin-top: 22px; }
+.tour-months > div { flex: 1; max-width: 110px; border: 1px solid #dce7d5; border-radius: 10px; background: white; padding: 20px 8px; }
+.tour-months small { display: block; font-size: 10px; color: #77836f; margin-bottom: 8px; }
+.tour-months strong { font-size: 17px; }
+.tour-category-example { display: flex; align-items: center; justify-content: center; gap: 23px; text-align: left; }
+.tour-mini-donut { width: 102px; height: 102px; flex-shrink: 0; border-radius: 50%; background: conic-gradient(#4e9c7c 0 60%, #afc579 60% 82%, #b5a2cb 82%); position: relative; }
+.tour-mini-donut::after { content: ''; position: absolute; inset: 22px; border-radius: 50%; background: #f0f5e9; }
+.tour-new-category { display: block; margin-top: 13px; font-size: 11px; color: var(--green); }
+.tour-meter { height: 7px; background: #eef2e8; border-radius: 6px; overflow: hidden; }
+.tour-meter span { display: block; width: 60%; height: 100%; background: #8bb46d; }
+.tour-copy { padding: 25px 28px 8px; }
+.tour-counter { color: #809071; font-size: 9px; letter-spacing: 1px; }
+.tour-copy h2 { font-size: 24px; letter-spacing: -.7px; margin: 9px 0; }
+.tour-copy p { font-size: 13px; color: var(--muted); line-height: 1.8; }
+.tour-actions { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 20px 28px 14px; }
+.tour-dots { display: flex; gap: 5px; margin-right: auto; }
+.tour-dots i { width: 6px; height: 6px; border-radius: 8px; background: #dfe7d9; }
+.tour-dots i.active { width: 19px; background: #78a859; }
+.tour-actions .button { font-size: 12px; padding: 11px 15px; }
+.tour-create { display: block; margin: 0 auto 16px; font-size: 12px; }
+.tour-footnote { text-align: center; padding: 0 20px 20px; color: #82907e; font-size: 10px; }
+.tour-error { margin: 12px 28px 0; }
+.tour-chat-example { width: min(310px, 100%); padding: 14px; background: white; border: 1px solid #dbe6d4; border-radius: 12px; }
+.tour-chat-heading { display: flex; justify-content: space-between; color: var(--green); font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+.tour-chat-example p { font-size: 11px; line-height: 1.6; padding: 10px; border-radius: 9px; }
+.tour-chat-user { margin-left: 24px; color: white; background: var(--green); }
+.tour-chat-answer { margin: 9px 20px 10px 0; background: #eff5e8; }
+.tour-chat-example small { font-size: 9px; color: #788a6f; }
+@media (max-width: 480px) {
+  .tour-top, .tour-copy { padding-left: 20px; padding-right: 20px; }
+  .tour-actions { padding: 18px 20px 14px; }
+  .tour-preview { min-height: 185px; padding: 20px; }
+  .tour-copy h2 { font-size: 22px; }
+  .tour-category-example { gap: 15px; }
+  .tour-category-example .tour-pill { font-size: 9px; }
+}
