@@ -57,6 +57,10 @@ O link expira em 10 minutos, só funciona uma vez e é guardado como hash no ban
 
 O vínculo usa o identificador numérico enviado pelo Telegram, não o username digitado numa mensagem. Grupos, canais, mensagens editadas e mensagens de bots não são processados. [Deep linking oficial](https://core.telegram.org/bots/features#deep-linking).
 
+## Orçamento por mensagem
+
+Use `Definir orçamento de outubro para 3000` ou `Recebi 2500 este mês`. O bot define o total daquele mês e confirma o resultado; não soma recebimentos nem cria despesas. Se faltar um detalhe, pergunta antes de salvar. Também aceita `11/2026`, `2026-11`, `mês 11`, `mês passado` e `próximo mês`. Para reverter a última alteração do orçamento feita no chat, envie `desfazer orçamento`.
+
 ## Comportamento e diagnóstico
 
 - Chat do site e Telegram compartilham a conversa da conta. Uma pergunta pendente pode ser respondida em qualquer um deles. No crédito, a primeira fatura continua no mês seguinte.

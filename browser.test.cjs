@@ -287,6 +287,15 @@ async function addExpense({ name, amount, category, date, installments = 1, note
     assert.equal(await evaluate("document.querySelector('#chat-dialog').hidden"),false);
     assert.equal(await evaluate("document.querySelector('#chart-grid').hidden"),true);
     await click('[data-view="overview"]');
+    const oldBudgets = (await state()).budgets;
+    await message('Definir orçamento de abril de 2026 para 3000');
+    assert.equal((await state()).budgets['2026-04'],300000);
+    assert.deepEqual((await state()).expenses,before);
+    await message('Recebi 4000 em abril de 2026');
+    assert.equal((await state()).budgets['2026-04'],400000);
+    await message('Desfazer orçamento');
+    assert.equal((await state()).budgets['2026-04'],300000);
+    if (oldBudgets['2026-04'] !== undefined) await message(`Definir orçamento de abril de 2026 para ${oldBudgets['2026-04']/100}`);
     await message('Gastei 85,90 no mercado via Pix em 01/04/2026');
     assert.equal((await state()).expenses.length,before.length+1);
     assert.equal((await state()).expenses.at(-1).paymentMethod,'pix');
@@ -389,7 +398,7 @@ async function addExpense({ name, amount, category, date, installments = 1, note
     assert.equal(await evaluate("document.querySelector('#main-sidebar').inert"),true);
     await click('#mobile-menu-toggle'); await click('[data-view="overview"]');
     await cdp('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
-    assert.equal(await evaluate("document.querySelector('#main-sidebar').inert"),false);
+    await waitFor(()=>evaluate("!document.querySelector('#main-sidebar').inert"),'desktop media query applied');
     await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
     await sleep(300);
     assert.equal(await evaluate("document.documentElement.scrollWidth <= innerWidth"),true);

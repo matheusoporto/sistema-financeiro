@@ -1,11 +1,12 @@
 'use strict';
 const F = require('./finance.js');
+const {isBudget,parseBudget} = require('./chat-budget.cjs');
 const key = text => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 const money = '(?:\\d{1,3}(?:\\.\\d{3})+|\\d+)(?:,\\d{1,2}|\\.\\d{1,2})?';
 const months = ['janeiro','fevereiro','marco','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
 const payments = { pix:'Pix', credito:'Crédito', debito:'Débito', dinheiro:'Dinheiro', boleto:'Boleto' };
 const blank = () => ({ version:1, expenses:[], customCategories:[], budgets:{}, preferences:{} });
-const help = 'Posso registrar uma compra por mensagem, corrigir o último lançamento e consultar seus gastos. Exemplos:\n• Gastei 85,90 no mercado via Pix\n• Comprei um tênis por 300 em 3 vezes, categoria Online\n• Relatório de setembro de 2026\n• Quanto gastei com mercado este mês?\n• Corrigir último gasto: valor 90\n• Desfazer último gasto\n\nInforme valores em números. No crédito, a primeira fatura vai para o mês seguinte à compra, mesmo em uma vez. Uma data explícita de primeira parcela ou fatura tem prioridade. Nos outros pagamentos, sem data uso hoje. Esta versão interpreta texto por regras, ainda sem IA externa ou WhatsApp.';
+const help = 'Posso registrar uma compra por mensagem, corrigir o último lançamento, definir o orçamento mensal e consultar seus gastos. Exemplos:\n• Gastei 85,90 no mercado via Pix\n• Comprei um tênis por 300 em 3 vezes, categoria Online\n• Relatório de setembro de 2026\n• Quanto gastei com mercado este mês?\n• Corrigir último gasto: valor 90\n• Desfazer último gasto\n• Definir orçamento de outubro para 3000\n• Recebi 2500 este mês\n• Desfazer orçamento\n\nOrçamentos substituem o total do mês; recebimentos não são somados. Informe valores em números. No crédito, a primeira fatura vai para o mês seguinte à compra, mesmo em uma vez. Uma data explícita de primeira parcela ou fatura tem prioridade. Nos outros pagamentos, sem data uso hoje. Esta versão interpreta texto por regras, sem IA externa, disponível no site e no Telegram.';
 
 function categoryFor(text, custom) {
   const normalized = key(text);
@@ -114,9 +115,17 @@ function handleMessage(text, conversation = {}, originalData = blank(), options 
   try {
     if (/^(cancelar|cancela|deixa pra la)$/.test(normalized)) { delete state.pending; return result('Certo, cancelei os detalhes pendentes. Nenhum gasto foi alterado.'); }
     if (/^(ajuda|oi|ola|menu|exemplos)[!.?]*$/.test(normalized)) return result(help);
-    if (/^(desfazer|desfaca)( ultimo gasto| ultimo lancamento)?[.!]?$/.test(normalized)) {
+    if (/^(desfazer|desfaca)( ultimo gasto| ultimo lancamento| orcamento| ultimo orcamento)?[.!]?$/.test(normalized)) {
       const operation = state.lastOperation;
       if (!operation) return result('Não há um lançamento recente do chat para desfazer.');
+      if (operation.kind === 'budget') {
+        if (/gasto|lancamento/.test(normalized)) return result('A última alteração foi no orçamento. Use “desfazer orçamento”.');
+        if (data.budgets[operation.month] !== operation.after) return result('Esse orçamento mudou no painel. Confira a versão atual antes de desfazer.');
+        if (operation.before === null) delete data.budgets[operation.month]; else data.budgets[operation.month] = operation.before;
+        delete state.lastOperation; delete state.pending; changed = true;
+        return result('Desfiz a última definição de orçamento. Seus gastos foram preservados.');
+      }
+      if (/orcamento/.test(normalized)) return result('Não há uma alteração recente de orçamento para desfazer.');
       const current = data.expenses.find(e => e.id === operation.after.id);
       if (JSON.stringify(current) !== JSON.stringify(operation.after)) return result('Essa compra foi alterada ou excluída depois. Não vou desfazer uma versão diferente; confira o painel.');
       data.expenses = operation.before ? data.expenses.map(e => e.id === current.id ? operation.before : e) : data.expenses.filter(e => e.id !== current.id);
@@ -132,6 +141,24 @@ function handleMessage(text, conversation = {}, originalData = blank(), options 
       const summary = F.summarize(entries,data.customCategories);
       const label = category ? categories.find(c => c.id === category).label : 'Todas as categorias';
       return result(`Relatório de ${month.slice(5)}/${month.slice(0,4)} · ${label}\nTotal: ${F.formatCurrency(summary.totalCents)} em ${summary.count} lançamento(s).\nParcelas no mês: ${F.formatCurrency(summary.installmentCents)}.${summary.largestEntry ? `\nMaior gasto: ${summary.largestEntry.name} · ${F.formatCurrency(summary.largestEntry.amountCents)}.` : '\nNenhum gasto neste período.'}${data.budgets[month] !== undefined && !category ? `\nOrçamento restante: ${F.formatCurrency(data.budgets[month]-summary.totalCents)}.` : ''}`, { report:{month,label,totalCents:summary.totalCents,categories:summary.byCategory.map(c => ({label:c.label,color:c.color,totalCents:c.totalCents}))} });
+    }
+    if (isBudget(text) || state.pending?.kind === 'budget') {
+      if (state.pending && state.pending.kind !== 'budget') return result('Há uma compra com detalhes pendentes. Conclua ou digite “cancelar” antes de definir o orçamento.');
+      if (state.pending?.kind === 'budget' && /^(gastei|paguei|comprei|compramos|registrar|registre|adicionar)\b/.test(normalized)) return result('Há um orçamento pendente. Responda à pergunta ou digite “cancelar” antes de registrar uma compra.');
+      const parsed = parseBudget(text,today);
+      const draft = isBudget(text) ? {} : {...state.pending.draft};
+      if (parsed.month !== undefined) draft.month = parsed.month;
+      if (parsed.amount !== undefined) draft.amount = parsed.amount;
+      if (!draft.month || draft.amount === undefined) {
+        state.pending = {kind:'budget',draft};
+        return result(draft.amount === undefined ? 'Qual é o valor total do orçamento? Exemplo: 3.000,00.' : 'Para qual mês? Exemplo: este mês, outubro ou 10/2026.',{actions:draft.amount === undefined ? ['Cancelar'] : ['Este mês','Próximo mês','Cancelar']});
+      }
+      const before = data.budgets[draft.month] ?? null;
+      data.budgets[draft.month] = draft.amount;
+      F.validateBackup(data);
+      state.lastOperation = {kind:'budget',month:draft.month,before,after:draft.amount};
+      delete state.pending; changed = true;
+      return result(`Orçamento de ${draft.month.slice(5)}/${draft.month.slice(0,4)} definido para ${F.formatCurrency(draft.amount)}.${before !== null ? ` Antes: ${F.formatCurrency(before)}.` : ''}\nEsse é o total disponível para planejar o mês; não foi somado ao orçamento anterior nem criado um gasto.`,{actions:['Desfazer orçamento','Relatório deste mês']});
     }
     if (/^corrigir ultimo (gasto|lancamento)/.test(normalized)) {
       const last = state.lastOperation?.after;

@@ -55,6 +55,19 @@ Valores são em reais e escritos com números. “300 em 3 vezes” é R$ 300 no
 
 Se faltar nome, valor, número de parcelas ou categoria, o bot pergunta antes de registrar. Responda só ao detalhe pedido, como `Online` ou `300,00`. Nas sugestões, clique para preencher e depois envie. `Criar categoria Transporte` cria uma categoria durante essa pergunta; `cancelar` abandona os detalhes pendentes. Compras completas são registradas automaticamente e a resposta mostra o resultado. O pagamento informado (Pix, crédito, débito, dinheiro ou boleto) também fica salvo e aparece no painel.
 
+O chat do site e o Telegram também definem o orçamento mensal:
+
+```text
+Definir orçamento de outubro para 3000
+Definir orçamento do mês de novembro de 2026 para R$ 4.500,50
+Recebi 2500 esse mês
+Recebi 3000 no mês 12
+Definir orçamento 01/2027 para 4000
+Desfazer orçamento
+```
+
+Esses comandos substituem o orçamento total do mês, sem somar recebimentos e sem cadastrar gastos. O bot confirma o mês, o novo valor e o anterior, quando houver. Aceita nomes de meses (ano atual se omitido), `MM/AAAA`, `AAAA-MM`, `mês 09`, `este mês`, `mês passado` e `próximo mês`. Se faltar valor ou mês, pergunta antes de salvar. `Cancelar` abandona a solicitação pendente. `Desfazer orçamento` restaura a última alteração feita no chat, desde que o valor não tenha sido modificado depois no painel.
+
 Consultas e ajustes:
 
 ```text

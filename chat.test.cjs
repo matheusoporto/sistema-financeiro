@@ -8,6 +8,48 @@ const {createChatService} = require('./chat-service.cjs');
 const options = {today:'2026-09-15',expenseId:'test-expense'};
 const send = (text,previous) => E.handleMessage(text,previous?.state || {},previous?.data || E.blank(),options);
 
+test('monthly budgets recognize BRL, named and numeric months without creating expenses', () => {
+  for (const [text,month,amount] of [
+    ['Definir orçamento do mês de outubro para 3.000,50','2026-10',300050],
+    ['Definir orçamento de outubro de 2027 para R$ 2026','2027-10',202600],
+    ['Recebi 2500 esse mês','2026-09',250000],
+    ['Recebi R$ 1.234,56 no mês 11','2026-11',123456],
+    ['Definir orçamento 12/2027 para 4000','2027-12',400000],
+    ['Defina o orçamento de 2027-01 para 5000','2027-01',500000],
+    ['Recebi 100 mês passado','2026-08',10000],
+    ['Definir orçamento deste mês para 0','2026-09',0]
+  ]) {
+    const result = send(text);
+    assert.equal(result.changed,true,text); assert.equal(result.data.budgets[month],amount,text);
+    assert.deepEqual(result.data.expenses,[]); assert.match(result.reply,/Orçamento/);
+  }
+  const result = E.handleMessage('Definir orçamento próximo mês para 100',{},E.blank(),{today:'2026-12-31'});
+  assert.equal(result.data.budgets['2027-01'],10000);
+});
+test('budget follow-ups, replacement, cancellation and undo preserve other data', () => {
+  let result = send('Definir orçamento de novembro');
+  assert.equal(result.changed,false); result=send('2.000,00',result);
+  assert.equal(result.data.budgets['2026-11'],200000);
+  result=send('Recebi 3500 em novembro',result);
+  assert.equal(result.data.budgets['2026-11'],350000);
+  result=send('Desfazer orçamento',result); assert.equal(result.data.budgets['2026-11'],200000);
+  let pending=send('Definir orçamento');pending=send('1000',pending);pending=send('Este mês',pending);
+  assert.equal(pending.data.budgets['2026-09'],100000);
+  pending=send('Desfazer',pending);assert.deepEqual(pending.data.budgets,{});
+  const modified=send('Recebi 100 este mês');modified.data.budgets['2026-09']=20000;
+  assert.equal(send('desfazer orçamento',modified).changed,false);
+  const expensePending=send('Comprei um celular por 100');
+  assert.equal(send('Recebi 3000 este mês',expensePending).changed,false);
+  const budgetPending=send('Definir orçamento de dezembro');
+  assert.equal(send('Gastei 50 no mercado',budgetPending).changed,false);
+  assert.equal(send('Cancelar',budgetPending).state.pending,undefined);
+});
+test('ambiguous or invalid budgets never change financial data', () => {
+  for(const text of ['Recebi -100 este mês','Recebi 100 e 200 este mês','Definir orçamento janeiro e fevereiro para 100','Recebi 100 mês 13','Recebi USD 100 este mês','Recebi 3 mil este mês','Definir orçamento 13/2026 para 100','Recebi 1,234 este mês']) {
+    const result=send(text);assert.equal(result.changed,false,text);assert.deepEqual(result.data,E.blank(),text);
+  }
+});
+
 test('chat registers Pix and preserves structured payment through backups and entries', () => {
   const result = send('Gastei 85,90 no mercado via Pix');
   assert.equal(result.changed,true);

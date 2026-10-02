@@ -40,7 +40,7 @@
       message.append(author,text); if (item.report) message.append(reportCard(item.report,item.text)); history.append(message);
     }
     const suggestions = $('#chat-suggestions'); suggestions.replaceChildren();
-    for (const value of messages.at(-1).actions?.length ? messages.at(-1).actions : ['Ajuda','Relatório deste mês','Cancelar']) {
+    for (const value of messages.at(-1).actions?.length ? messages.at(-1).actions : ['Ajuda','Definir orçamento','Relatório deste mês','Cancelar']) {
       const button = document.createElement('button'); button.type = 'button'; button.textContent = value;
       button.onclick = () => { $('#chat-input').value = value; $('#chat-input').focus(); };
       suggestions.append(button);

@@ -73,7 +73,7 @@ function createTelegram(db, chat, config, now = Date.now, api = telegramAPI) {
           reply = 'Telegram conectado ao MoneyRestly! Envie: Gastei 85,90 no mercado via Pix. Você também pode pedir relatório deste mês ou desfazer.';
         }
       } else if (!user) reply = 'Entre na sua conta MoneyRestly e selecione Conectar Telegram para vincular este chat.';
-      else if (text === '/start' || text === '/help') reply = 'Envie um gasto, por exemplo: Comprei um celular por 1200 no crédito em 6 parcelas, categoria Online. Ou peça: relatório deste mês. Para desconectar, use o menu Telegram no site.';
+      else if (text === '/start' || text === '/help') reply = 'Envie um gasto, por exemplo: Comprei um celular por 1200 no crédito em 6 parcelas, categoria Online. Ou peça: relatório deste mês. Para definir o orçamento, envie: Recebi 3000 este mês. Esse valor substitui o total do mês. Para desconectar, use o menu Telegram no site.';
       else if (!text || text.length > 1000) reply = 'Por enquanto, envie mensagens de texto com até 1.000 caracteres. Áudios, fotos e arquivos ainda não são interpretados.';
       else {
         const account = db.prepare('SELECT revision FROM account_data WHERE user_id=?').get(user);

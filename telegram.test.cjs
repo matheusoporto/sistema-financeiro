@@ -53,6 +53,21 @@ test('expenses and reports reuse chat; retries, restarts and send failures never
   await s.bot.receive(purchase);assert.equal(data().expenses.length,1);
   await s.bot.receive(s.update(200,'Gastei 20 no mercado via Pix',22));assert.equal(data().expenses.length,1);
 });
+test('Telegram defines, clarifies and undoes monthly budgets without duplicate or cross-account writes',async t=>{
+  const s=setup();t.after(()=>s.db.close());
+  await s.bot.receive(s.update(1,'/start '+s.token('alice')));
+  await s.bot.receive(s.update(2,'Definir orçamento de novembro'));
+  const value=s.update(3,'3500');
+  await s.bot.receive(value);await s.bot.receive(value);
+  const data=()=>JSON.parse(s.db.prepare("SELECT payload FROM account_data WHERE user_id='alice'").get().payload);
+  assert.equal(data().budgets['2026-11'],350000);assert.deepEqual(data().expenses,[]);
+  await s.bot.receive(s.update(4,'Recebi 4000 em novembro'));
+  assert.equal(data().budgets['2026-11'],400000);
+  await s.bot.receive(s.update(5,'desfazer orçamento'));
+  assert.equal(data().budgets['2026-11'],350000);
+  assert.equal(s.db.prepare("SELECT payload FROM account_data WHERE user_id='bob'").get().payload,null);
+});
+
 test('groups, edited updates and invalid senders are ignored; unlink cancels pending replies',async t=>{
   const s=setup();t.after(()=>s.db.close());const token=s.token('alice');
   const group=s.update(1,'/start '+token);group.message.chat.type='group';
