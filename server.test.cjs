@@ -29,11 +29,11 @@ async function running(options = {}) {
       await closed;
     },
     async request(route, { method = 'GET', body, headers = {}, account, rawBody } = {}) {
-      const outgoing = { Origin: options.publicOrigin || origin, 'X-Requested-With': 'finanto', ...headers };
+      const outgoing = { Origin: options.publicOrigin || origin, 'X-Requested-With': 'moneyrestly', ...headers };
       if (account) {
         outgoing.Cookie = account.cookie;
         outgoing['X-CSRF-Token'] = account.csrfToken;
-        outgoing['X-Finanto-Account'] = account.user.id;
+        outgoing['X-MoneyRestly-Account'] = account.user.id;
       }
       // Explicit headers can intentionally override otherwise valid auth headers.
       Object.assign(outgoing, headers);
@@ -59,16 +59,42 @@ function backup(overrides = {}) {
   return { version: 1, expenses: [], budgets: { '2026-09': 150000 }, preferences: { selectedMonth: '2026-09' }, customCategories: [], ...overrides };
 }
 
+test('Telegram webhook authenticates independently and account linking requires session and CSRF', async t => {
+  const sent = [];
+  const config = {token:'123:test',username:'moneyrestly_test_bot',secret:'s'.repeat(32)};
+  const app = await running({telegram:config,telegramAPI:async (_,method,body)=>sent.push({method,...body})});
+  t.after(()=>app.close());
+  const alice = await app.register('telegram.alice');
+  const bob = await app.register('telegram.bob');
+  assert.equal((await app.request('/api/account/telegram')).status,401);
+  assert.equal((await app.request('/api/account/telegram',{method:'POST',account:alice,headers:{'X-CSRF-Token':null},body:{}})).status,403);
+  const link = await app.request('/api/account/telegram',{method:'POST',account:alice,body:{}});
+  assert.equal(link.status,200);
+  const token = new URL(link.json.url).searchParams.get('start');
+  const update = {update_id:100,message:{chat:{id:123,type:'private'},from:{id:123,is_bot:false},text:'/start '+token}};
+  assert.equal((await app.request('/api/telegram/webhook',{method:'POST',body:update})).status,403);
+  const webhook = body=>app.request('/api/telegram/webhook',{method:'POST',headers:{Origin:null,'X-Requested-With':null,'X-Telegram-Bot-Api-Secret-Token':config.secret},body});
+  assert.equal((await webhook(update)).status,200);
+  assert.equal((await app.request('/api/account/telegram',{account:alice})).json.linked,true);
+  assert.equal((await app.request('/api/account/telegram',{account:bob})).json.linked,false);
+  update.update_id=101;update.message.text='Gastei 85,90 no mercado via Pix';
+  assert.equal((await webhook(update)).status,200);assert.equal((await webhook(update)).status,200);
+  assert.equal((await app.request('/api/data',{account:alice})).json.data.expenses.length,1);
+  assert.equal((await app.request('/api/data',{account:bob})).json.data,null);
+  assert.equal(sent.length,2);
+  assert.equal((await app.request('/api/account/telegram',{method:'DELETE',account:alice,body:{}})).json.linked,false);
+});
+
 test('HTTP accounts, persistence, sessions and account-isolated revision updates', async t => {
   const tempRoot = fs.realpathSync(os.tmpdir());
-  const directory = fs.mkdtempSync(path.join(tempRoot, 'finanto-server-'));
+  const directory = fs.mkdtempSync(path.join(tempRoot, 'moneyrestly-server-'));
   const dbPath = path.join(directory, 'test.sqlite');
   let app = await running({ dbPath });
   t.after(async () => {
     await app.close();
     const resolved = fs.realpathSync(directory);
     assert.equal(path.dirname(resolved), tempRoot);
-    assert.ok(path.basename(resolved).startsWith('finanto-server-'));
+    assert.ok(path.basename(resolved).startsWith('moneyrestly-server-'));
     fs.rmSync(resolved, { recursive: true, force: true });
   });
 
@@ -101,10 +127,10 @@ test('HTTP accounts, persistence, sessions and account-isolated revision updates
   assert.equal(result.json.revision, 1);
   assert.deepEqual(result.json.data, Finance.validateBackup(data));
 
-  result = await app.request('/api/data', { method: 'PUT', account: bob, headers: { 'X-Finanto-Account': alice.user.id }, body: { data, revision: 0 } });
+  result = await app.request('/api/data', { method: 'PUT', account: bob, headers: { 'X-MoneyRestly-Account': alice.user.id }, body: { data, revision: 0 } });
   assert.equal(result.status, 401, 'stale tab must not overwrite a new account');
-  assert.equal((await app.request('/api/data', { account: alice, headers: { 'X-Finanto-Account': null } })).status, 401);
-  assert.equal((await app.request('/api/logout', { method: 'POST', account: bob, headers: { 'X-Finanto-Account': alice.user.id }, body: {} })).status, 401);
+  assert.equal((await app.request('/api/data', { account: alice, headers: { 'X-MoneyRestly-Account': null } })).status, 401);
+  assert.equal((await app.request('/api/logout', { method: 'POST', account: bob, headers: { 'X-MoneyRestly-Account': alice.user.id }, body: {} })).status, 401);
 
   const before = new DatabaseSync(dbPath);
   const storedUser = before.prepare('SELECT * FROM users WHERE id = ?').get(alice.user.id);
@@ -164,7 +190,7 @@ test('origin, CSRF, bodies, private paths and headers are enforced', async t => 
   const spaced = await app.register('spaces-test', { password: spacedPassword });
   assert.equal((await app.request('/api/login', { method: 'POST', body: { username: spaced.user.username, password: spacedPassword.trim() } })).status, 401);
   assert.equal((await app.request('/api/login', { method: 'POST', body: { username: spaced.user.username, password: spacedPassword } })).status, 200);
-  for (const route of ['/server.cjs', '/server.test.cjs', '/package.json', '/.gitignore', '/data/finanto.sqlite', '/data/finanto.sqlite-wal', '/README.md', '/%2e%2e%2fserver.cjs', '/.git/config', '/.env', '/.env.example', '/mailer.cjs', '/node_modules/nodemailer/package.json']) {
+  for (const route of ['/server.cjs', '/server.test.cjs', '/package.json', '/.gitignore', '/data/moneyrestly.sqlite', '/data/moneyrestly.sqlite-wal', '/README.md', '/%2e%2e%2fserver.cjs', '/.git/config', '/.env', '/.env.example', '/mailer.cjs', '/node_modules/nodemailer/package.json']) {
     const result = await app.request(route);
     assert.equal(result.status, 404, route);
     assert.match(result.headers.get('content-type'), /application\/json/);
@@ -216,7 +242,7 @@ test('LAN addresses accept login while foreign hosts, ports and origins remain b
   const lanOrigin = `http://${lanHost}`;
   async function requestWithHost(route, host, origin, body) {
     return new Promise((resolve,reject) => {
-      const req = http.request(app.origin+route,{method:body ? 'POST' : 'GET',headers:{Host:host,Origin:origin,'X-Requested-With':'finanto','Content-Type':'application/json'}},res => {
+      const req = http.request(app.origin+route,{method:body ? 'POST' : 'GET',headers:{Host:host,Origin:origin,'X-Requested-With':'moneyrestly','Content-Type':'application/json'}},res => {
         let text = ''; res.setEncoding('utf8'); res.on('data',chunk => text += chunk);
         res.on('end',() => resolve({status:res.statusCode,text}));
       });
@@ -274,11 +300,11 @@ async function waitUntil(fn) {
 }
 
 test('password reset is private, hashed, expiring, single use and invalidates all old sessions without changing expenses', async t => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'orcaviva-reset-'));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moneyrestly-reset-'));
   const dbPath = path.join(directory, 'test.sqlite');
   const messages = [];
   let timestamp = Date.now();
-  const app = await running({ dbPath, now: () => timestamp, publicOrigin: 'https://orcaviva.example', mailer: { sendReset: async message => { messages.push(message); } }, rateLimits: { recoveryPerEmail: 20, recoveryPerIP: 30, authPerIP: 100, loginPerUsername: 100 } });
+  const app = await running({ dbPath, now: () => timestamp, publicOrigin: 'https://moneyrestly.example', mailer: { sendReset: async message => { messages.push(message); } }, rateLimits: { recoveryPerEmail: 20, recoveryPerIP: 30, authPerIP: 100, loginPerUsername: 100 } });
   t.after(async () => { await app.close(); });
   const account = await app.register('reset-user');
   const other = await app.register('unaffected-user');
@@ -293,7 +319,7 @@ test('password reset is private, hashed, expiring, single use and invalidates al
   await waitUntil(() => messages.length === 1);
   assert.equal(messages[0].email, account.user.email);
   const link = new URL(messages[0].url);
-  assert.equal(link.origin, 'https://orcaviva.example');
+  assert.equal(link.origin, 'https://moneyrestly.example');
   const token = link.hash.slice(7);
   assert.match(token, /^[A-Za-z0-9_-]{43}$/);
   assert.ok(!known.text.includes(token));
@@ -334,7 +360,7 @@ test('recovery limits apply to all addresses and unavailable SMTP never pretends
 });
 
 test('SMTP failures remove their reset token without leaking details to the requester', async t => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'orcaviva-mail-failure-'));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moneyrestly-mail-failure-'));
   const dbPath = path.join(directory, 'test.sqlite');
   let failed = false;
   const logs = [];
@@ -352,7 +378,7 @@ test('SMTP failures remove their reset token without leaking details to the requ
 });
 
 test('old database migration preserves passwords and expenses; email attachment and tour are account-bound and persistent', async t => {
-  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'orcaviva-migration-'));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'moneyrestly-migration-'));
   const dbPath = path.join(directory, 'test.sqlite');
   const oldPassword = 'senha antiga sem simbolo';
   const salt = randomBytes(16);
@@ -374,7 +400,7 @@ test('old database migration preserves passwords and expenses; email attachment 
   const addEmail = (body, headers) => app.request('/api/account/email', { method: 'POST', account, body, headers });
   assert.equal((await addEmail({ email: 'legacy@example.com', password: 'wrong' })).status, 401);
   assert.equal((await addEmail({ email: 'legacy@example.com', password: oldPassword }, { 'X-CSRF-Token': null })).status, 403);
-  assert.equal((await addEmail({ email: 'legacy@example.com', password: oldPassword }, { 'X-Finanto-Account': 'another-id' })).status, 401);
+  assert.equal((await addEmail({ email: 'legacy@example.com', password: oldPassword }, { 'X-MoneyRestly-Account': 'another-id' })).status, 401);
   const updated = await addEmail({ email: 'LEGACY@example.com', password: oldPassword });
   assert.equal(updated.status, 200);
   assert.equal(updated.json.user.email, 'legacy@example.com');
@@ -397,7 +423,7 @@ test('chat HTTP authentication, CSRF, retries and account data revisions stay is
   const post = (extra = {}) => app.request('/api/chat',{method:'POST',account:alice,body,...extra});
   assert.equal((await post({headers:{'X-CSRF-Token':null}})).status,403);
   assert.equal((await post({headers:{Origin:'https://attacker.example'}})).status,403);
-  assert.equal((await post({headers:{'X-Finanto-Account':bob.user.id}})).status,401);
+  assert.equal((await post({headers:{'X-MoneyRestly-Account':bob.user.id}})).status,401);
   const result = await post(); assert.equal(result.status,200); assert.equal(result.json.changed,true);
   assert.deepEqual((await post()).json,result.json);
   const data = (await app.request('/api/data',{account:alice})).json;

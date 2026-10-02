@@ -4,28 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#185c47">
-  <meta name="description" content="Orçaviva: seu dinheiro, com mais clareza. Organize despesas, parcelas e orçamentos em um só lugar.">
-  <title>Orçaviva — Seu dinheiro, com mais clareza</title>
+  <meta name="description" content="MoneyRestly: seu dinheiro, com mais clareza. Organize despesas, parcelas e orçamentos em um só lugar.">
+  <title>MoneyRestly — Seu dinheiro, com mais clareza</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23185c47'/%3E%3Cg transform='translate(7 7) scale(1.08)'%3E%3Cpath d='M18.5 10a7 7 0 1 1-5-4.8' fill='none' stroke='%23d7f2bb' stroke-width='2.6' stroke-linecap='round'/%3E%3Cpath d='M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z' fill='%23d7f2bb'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="auth.css">
   <link rel="stylesheet" href="tour.css">
   <link rel="stylesheet" href="chat.css">
   <script src="finance.js" defer></script>
+  <script src="migrate-storage.js" defer></script>
   <script src="api.js" defer></script>
   <script src="tour.js" defer></script>
   <script src="chat.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
-  <section class="auth-screen" id="auth-screen" aria-label="Acesso ao orçaviva">
+  <section class="auth-screen" id="auth-screen" aria-label="Acesso ao MoneyRestly">
     <div class="auth-story">
-      <div class="auth-brand"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18.5 10a7 7 0 1 1-5-4.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z" fill="currentColor"/></svg></span><span>orçaviva.</span></div>
+      <div class="auth-brand"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18.5 10a7 7 0 1 1-5-4.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z" fill="currentColor"/></svg></span><span>MoneyRestly.</span></div>
       <div class="auth-story-content"><span class="auth-eyebrow">SEU DINHEIRO, COM MAIS CLAREZA</span><h1>Mais espaço<br>para os seus<br><em>próximos planos.</em></h1><p>Um lugar para organizar seus gastos, acompanhar suas parcelas e deixar a vida mais leve.</p><div class="auth-illustration" aria-hidden="true"><div class="auth-orbit orbit-one"></div><div class="auth-orbit orbit-two"></div><div class="auth-float-card"><span class="auth-card-icon">✳</span><div>Um passo de cada vez.<strong>Você no controle.</strong></div><span class="auth-card-check">✓</span></div><span class="auth-small-star">✧</span></div></div>
       <p class="auth-story-footer">Pequenos hábitos. Novas possibilidades.</p>
     </div>
     <div class="auth-panel"><div class="auth-panel-inner">
-      <div class="auth-mobile-brand">orçaviva<span>.</span></div>
+      <div class="auth-mobile-brand">MoneyRestly<span>.</span></div>
       <div class="auth-tabs" role="group" aria-label="Entrar ou criar conta"><button type="button" class="active" id="show-login" aria-pressed="true">Entrar</button><button type="button" id="show-register" aria-pressed="false">Criar conta</button></div>
       <div class="auth-intro"><span class="auth-greeting">SEU ESPAÇO PESSOAL</span><h2 id="auth-title">Bom te ver por aqui.</h2><p id="auth-description">Entre na sua conta e retome seus planos.</p></div>
       <p class="auth-message" id="auth-message" role="status" hidden></p>
@@ -58,17 +59,18 @@
   <div id="app-shell" hidden inert>
   <a class="skip-link" href="#main-content">Pular para o conteúdo</a>
   <aside class="sidebar" aria-label="Menu principal">
-    <a class="brand" href="#" aria-label="orçaviva, visão geral"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18.5 10a7 7 0 1 1-5-4.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z" fill="currentColor"/></svg></span><span>orçaviva<span class="brand-dot">.</span></span></a>
+    <a class="brand" href="#" aria-label="MoneyRestly, visão geral"><span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18.5 10a7 7 0 1 1-5-4.8" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M14 8c0-4 3-6 7-6 0 4-2 7-7 6Z" fill="currentColor"/></svg></span><span>MoneyRestly<span class="brand-dot">.</span></span></a>
     <div class="workspace-label"><span class="workspace-avatar" data-icon="wallet"></span><span><span id="account-name">Meu espaço pessoal</span><small id="account-username">Um passo de cada vez</small></span><span class="workspace-dot"></span></div>
     <p class="nav-caption">ACOMPANHE</p>
     <nav class="main-nav">
-      <button class="nav-item" id="open-chat"><span data-icon="sparkles"></span><span>Conversar com Orçaviva</span></button>
+      <button class="nav-item" id="open-chat"><span data-icon="sparkles"></span><span>Conversar com MoneyRestly</span></button>
       <button class="nav-item active" data-view="overview"><span data-icon="dashboard"></span><span>Visão geral</span></button>
       <button class="nav-item" data-view="expenses"><span data-icon="receipt"></span><span>Minhas despesas</span><span id="expense-count" class="nav-count">0</span></button>
       <button class="nav-item" data-view="planning"><span data-icon="calendar"></span><span>Planejamento</span></button>
     </nav>
     <p class="nav-caption tools-caption">FERRAMENTAS</p>
     <nav class="tools-nav">
+      <button class="nav-item" id="open-telegram"><span data-icon="sparkles"></span><span>Conectar Telegram</span></button>
       <button class="nav-item" id="replay-tour" title="Rever tour" aria-label="Rever tour"><span aria-hidden="true">?</span><span>Rever tour</span></button>
       <button class="nav-item" id="export-backup" aria-label="Exportar backup dos dados" title="Exportar backup"><span data-icon="download"></span><span>Exportar backup</span></button>
       <button class="nav-item" id="import-backup" aria-label="Importar backup dos dados" title="Importar backup"><span data-icon="upload"></span><span>Importar backup</span></button>
@@ -106,7 +108,7 @@
       <article class="summary-card budget-card"><div class="summary-label">Orçamento disponível <span class="metric-icon sage" data-icon="target"></span></div><strong class="metric-value" id="metric-budget">A definir</strong><div class="budget-progress"><span id="budget-progress-bar"></span></div><div class="metric-detail" id="metric-budget-detail">Defina uma meta para o seu mês</div></article>
     </section>
 
-    <section class="welcome-banner" id="welcome-banner" hidden><div class="welcome-icon" data-icon="sparkles"></div><div><strong>Seu próximo passo começa aqui.</strong><p>Adicione seu primeiro gasto ou explore um exemplo para conhecer o orçaviva.</p></div><button class="button button-light" id="start-demo">Explorar demonstração <span data-icon="arrow-right"></span></button></section>
+    <section class="welcome-banner" id="welcome-banner" hidden><div class="welcome-icon" data-icon="sparkles"></div><div><strong>Seu próximo passo começa aqui.</strong><p>Adicione seu primeiro gasto ou explore um exemplo para conhecer o MoneyRestly.</p></div><button class="button button-light" id="start-demo">Explorar demonstração <span data-icon="arrow-right"></span></button></section>
 
     <section class="chart-grid" id="chart-grid" aria-label="Gráficos do mês">
       <article class="panel trend-panel"><div class="panel-heading"><div><h3>O ritmo do seu mês</h3><p>Seus gastos acumulados, dia após dia.</p></div><span class="chart-key"><i></i>Gastos</span></div><div class="trend-chart" id="trend-chart"></div><div class="chart-insight" id="chart-insight"><span data-icon="sparkles"></span><p>Cada lançamento ajuda você a enxergar melhor seus hábitos.</p></div></article>
@@ -123,7 +125,7 @@
 
     <section class="planning-section" id="planning-section" hidden aria-label="Planejamento dos próximos meses"><div class="section-intro"><div><h3>Mais clareza para o que vem aí.</h3><p>Veja as parcelas já comprometidas e planeje seus próximos seis meses.</p></div><span class="tag tag-green">Visão dos próximos 6 meses</span></div><div class="planning-grid" id="planning-grid"></div><article class="panel commitments-panel"><div class="panel-heading"><div><h3>Compras que continuam com você</h3><p>Parcelamentos com valores a pagar a partir do mês selecionado.</p></div><span class="subtle-icon" data-icon="layers"></span></div><div id="commitments-list"></div></article></section>
 
-    <footer class="page-footer"><span><span class="footer-brand">orçaviva.</span> Mais clareza. Mais tranquilidade.</span><span><span data-icon="lock"></span> Salvo automaticamente · Na sua conta, em todos os dispositivos</span></footer>
+    <footer class="page-footer"><span><span class="footer-brand">MoneyRestly.</span> Mais clareza. Mais tranquilidade.</span><span><span data-icon="lock"></span> Salvo automaticamente · Na sua conta, em todos os dispositivos</span></footer>
   </main>
 
   <dialog class="modal expense-modal" id="expense-dialog" aria-labelledby="expense-dialog-title"><form id="expense-form"><div class="modal-heading"><div><span class="modal-eyebrow">CADA DETALHE CONTA</span><h2 id="expense-dialog-title">Adicionar um gasto</h2><p id="expense-dialog-description">Deixe registrado e siga com o seu dia.</p></div><button type="button" class="icon-button modal-close" data-close="expense-dialog" aria-label="Fechar"><span data-icon="x"></span></button></div><div class="modal-body"><input type="hidden" id="expense-id"><label class="form-field">Nome da compra<input id="expense-name" name="name" placeholder="Ex.: Compras da semana" maxlength="100" required autocomplete="off"></label><div class="form-row"><label class="form-field">Valor total da compra<div class="currency-input"><span>R$</span><input id="expense-amount" name="amount" placeholder="0,00" inputmode="decimal" required autocomplete="off"></div></label><label class="form-field">Categoria<select id="expense-category" name="category" required><option value="">Selecione uma categoria</option></select></label></div><label class="form-field">Data da compra / primeira parcela<input type="date" id="expense-date" name="date" min="0001-01-01" max="9999-12-31" required></label><div class="installment-toggle"><span><strong>Esta compra foi parcelada?</strong><small>As parcelas vão para os próximos meses automaticamente.</small></span><label class="switch"><input type="checkbox" id="expense-is-installment" aria-label="Compra parcelada"><span></span></label></div><div class="installment-fields" id="installment-fields" hidden><label class="form-field">Número de parcelas<input type="number" id="expense-installments" name="installments" min="2" max="120" step="1" value="2"></label></div><div class="installment-preview" id="installment-preview" aria-live="polite" hidden></div><label class="form-field">Observação <span class="optional">(opcional)</span><textarea id="expense-notes" name="notes" placeholder="Algo que você queira lembrar depois..." maxlength="500" rows="2"></textarea></label><p class="form-error" id="expense-error" role="alert" hidden></p></div><div class="modal-footer"><span><span data-icon="shield"></span>Seus dados ficam com você.</span><button type="button" class="button button-outline" data-close="expense-dialog">Cancelar</button><button type="submit" class="button button-primary" id="save-expense"><span data-icon="check"></span>Salvar gasto</button></div></form></dialog>
@@ -133,7 +135,7 @@
   <dialog class="modal small-modal" id="confirm-dialog" aria-labelledby="confirm-title"><div class="modal-heading"><div><h2 id="confirm-title"></h2><p id="confirm-description"></p></div><button type="button" class="icon-button" data-close="confirm-dialog" aria-label="Fechar"><span data-icon="x"></span></button></div><div class="modal-footer"><button type="button" class="button button-outline" data-close="confirm-dialog">Cancelar</button><button type="button" class="button button-danger" id="confirm-action">Confirmar</button></div></dialog>
   <input type="file" id="import-file" accept=".json,application/json" hidden>
   <section class="chat-widget" id="chat-dialog" aria-labelledby="chat-title" hidden>
-    <header class="chat-header"><div><span class="chat-eyebrow">SEU ASSISTENTE FINANCEIRO</span><h2 id="chat-title">Converse com o Orçaviva<span>.</span></h2><p>Chat de teste · Sem WhatsApp ou IA externa</p></div><button type="button" class="icon-button" id="close-chat" aria-label="Minimizar conversa" title="Minimizar conversa">−</button></header>
+    <header class="chat-header"><div><span class="chat-eyebrow">SEU ASSISTENTE FINANCEIRO</span><h2 id="chat-title">Converse com o MoneyRestly<span>.</span></h2><p>Gastos e relatórios na sua conta</p></div><button type="button" class="icon-button" id="close-chat" aria-label="Minimizar conversa" title="Minimizar conversa">−</button></header>
     <div class="chat-notice">Os lançamentos são salvos na sua conta real. Você pode corrigir ou desfazer pelo chat.</div>
     <div class="chat-history" id="chat-history" role="log" aria-label="Mensagens da conversa" aria-live="polite"></div>
     <div class="chat-suggestions" id="chat-suggestions"></div>
@@ -141,14 +143,19 @@
     <form class="chat-composer" id="chat-form"><label class="sr-only" for="chat-input">Sua mensagem</label><textarea id="chat-input" rows="2" maxlength="1000" placeholder="Ex.: Gastei 85,90 no mercado via Pix" required></textarea><button type="submit" class="button button-primary" id="chat-send">Enviar →</button></form>
     <div class="chat-bottom"><span id="chat-status" role="status">No crédito, a primeira fatura vai para o próximo mês.</span><button type="button" class="text-button" id="chat-refresh">Atualizar conversa</button></div>
   </section>
-  <button type="button" class="chat-launcher" id="restore-chat" aria-controls="chat-dialog" aria-expanded="false" hidden><span aria-hidden="true">✦</span><span>Conversar com Orçaviva</span><span aria-hidden="true">⌃</span></button>
+  <button type="button" class="chat-launcher" id="restore-chat" aria-controls="chat-dialog" aria-expanded="false" hidden><span aria-hidden="true">✦</span><span>Conversar com MoneyRestly</span><span aria-hidden="true">⌃</span></button>
+  <dialog class="modal small-modal" id="telegram-dialog" aria-labelledby="telegram-title">
+    <div class="modal-heading"><div><h2 id="telegram-title">Seu Telegram, sua conta.</h2><p>Registre gastos e consulte relatórios por mensagem.</p></div><button type="button" class="icon-button" data-close="telegram-dialog" aria-label="Fechar">×</button></div>
+    <div class="modal-body"><p id="telegram-status" role="status"></p><p>Ao conectar, este Telegram poderá consultar e alterar seus gastos. Use sua conversa privada com o bot e não compartilhe o link de vinculação.</p><a id="telegram-link" class="button button-primary" target="_blank" rel="noopener noreferrer" hidden>Abrir Telegram e conectar</a><p class="form-error" id="telegram-error" role="alert" hidden></p></div>
+    <div class="modal-footer"><button type="button" class="button button-outline" id="telegram-refresh">Atualizar status</button><button type="button" class="button button-primary" id="telegram-connect" hidden>Gerar link de conexão</button><button type="button" class="button button-outline" id="telegram-disconnect" hidden>Desconectar Telegram</button></div>
+  </dialog>
   <dialog class="modal small-modal" id="account-email-dialog" aria-labelledby="account-email-title">
     <form id="account-email-form"><div class="modal-heading"><div><h2 id="account-email-title">Seu e-mail de recuperação</h2><p>Confirme sua senha atual para vincular o endereço à sua conta.</p></div><button type="button" class="icon-button" data-close="account-email-dialog" aria-label="Fechar">×</button></div>
     <div class="modal-body"><label class="form-field">E-mail<input id="account-email" type="email" autocomplete="email" maxlength="254" required placeholder="voce@exemplo.com"></label><label class="form-field">Senha atual<input id="account-email-password" type="password" autocomplete="current-password" maxlength="128" required></label><p class="form-error" id="account-email-error" role="alert" hidden></p></div>
     <div class="modal-footer"><button type="button" class="button button-outline" data-close="account-email-dialog">Agora não</button><button type="submit" class="button button-primary" id="account-email-submit">Salvar e-mail</button></div></form>
   </dialog>
   <dialog class="modal tour-modal" id="tour-dialog" aria-labelledby="tour-title" aria-describedby="tour-description">
-    <div class="tour-top"><span class="modal-eyebrow">BEM-VINDO AO ORÇAVIVA</span><button type="button" class="text-button" id="tour-skip">Pular tour</button></div>
+    <div class="tour-top"><span class="modal-eyebrow">BEM-VINDO AO MONEYRESTLY</span><button type="button" class="text-button" id="tour-skip">Pular tour</button></div>
     <div class="tour-preview" id="tour-preview" aria-hidden="true"></div>
     <div class="tour-copy" aria-live="polite" aria-atomic="true"><span class="tour-counter" id="tour-counter"></span><h2 id="tour-title" tabindex="-1"></h2><p id="tour-description"></p></div>
     <p class="form-error tour-error" id="tour-error" role="alert" hidden></p>
@@ -158,6 +165,6 @@
   </dialog>
   </div>
   <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
-  <noscript><div class="noscript-warning">Ative o JavaScript no navegador para usar o orçaviva. Entre na sua conta para acessar os dados salvos no servidor.</div></noscript>
+  <noscript><div class="noscript-warning">Ative o JavaScript no navegador para usar o MoneyRestly. Entre na sua conta para acessar os dados salvos no servidor.</div></noscript>
 </body>
 </html>

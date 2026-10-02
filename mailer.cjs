@@ -18,8 +18,8 @@ function createMailer(env = process.env) {
     verify: () => transporter.verify(),
     sendReset: ({ email, url }) => transporter.sendMail({
       from: env.MAIL_FROM, to: { address: email, name: '' },
-      subject: 'Redefina sua senha — Orçaviva',
-      text: `Recebemos um pedido para redefinir sua senha no Orçaviva.\n\nAbra este link em até 30 minutos:\n${url}\n\nO link pode ser usado uma única vez. Se você não pediu esta alteração, ignore este e-mail. Sua senha continua a mesma.\n\nOrçaviva — Mais clareza para os seus próximos planos.`
+      subject: 'Redefina sua senha — MoneyRestly',
+      text: `Recebemos um pedido para redefinir sua senha no MoneyRestly.\n\nAbra este link em até 30 minutos:\n${url}\n\nO link pode ser usado uma única vez. Se você não pediu esta alteração, ignore este e-mail. Sua senha continua a mesma.\n\nMoneyRestly — Mais clareza para os seus próximos planos.`
     })
   };
 }

@@ -20,12 +20,12 @@
       meter.append(bar); row.append(name,value,meter); card.append(row);
     }
     const exportText = document.createElement('button'); exportText.className = 'text-button'; exportText.textContent = 'Baixar relatório';
-    exportText.onclick = () => download(text,'text/plain;charset=utf-8',`orcaviva-relatorio-${report.month}.txt`);
+    exportText.onclick = () => download(text,'text/plain;charset=utf-8',`moneyrestly-relatorio-${report.month}.txt`);
     const exportChart = document.createElement('button'); exportChart.className = 'text-button'; exportChart.textContent = 'Baixar gráfico';
     exportChart.onclick = () => {
       const rows = report.categories.map((c,i) => `<text x="24" y="${110+i*55}" font-size="13">${escape(c.label)}</text><text x="616" y="${110+i*55}" text-anchor="end" font-size="13">${escape(Finance.formatCurrency(c.totalCents))}</text><rect x="24" y="${120+i*55}" width="${Math.round(c.totalCents/report.totalCents*592)}" height="9" rx="4" fill="${escape(c.color)}"/>`).join('');
-      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="${Math.max(180,150+55*report.categories.length)}"><rect width="100%" height="100%" fill="#f8faf6"/><g font-family="Arial,sans-serif" fill="#263e33"><text x="24" y="34" font-size="22">Orçaviva · ${escape(report.month)}</text><text x="24" y="65" font-size="14">${escape(report.label)} · ${escape(Finance.formatCurrency(report.totalCents))}</text>${rows}</g></svg>`;
-      download(svg,'image/svg+xml',`orcaviva-grafico-${report.month}.svg`);
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="640" height="${Math.max(180,150+55*report.categories.length)}"><rect width="100%" height="100%" fill="#f8faf6"/><g font-family="Arial,sans-serif" fill="#263e33"><text x="24" y="34" font-size="22">MoneyRestly · ${escape(report.month)}</text><text x="24" y="65" font-size="14">${escape(report.label)} · ${escape(Finance.formatCurrency(report.totalCents))}</text>${rows}</g></svg>`;
+      download(svg,'image/svg+xml',`moneyrestly-grafico-${report.month}.svg`);
     };
     card.append(exportText,exportChart); return card;
   }
@@ -35,7 +35,7 @@
     const messages = payload.history.length ? payload.history : [{role:'assistant',text:'Oi! Vamos organizar uma compra?\nEscreva “Gastei 85,90 no mercado via Pix” ou peça um relatório do mês. Se faltar um detalhe, eu pergunto antes de salvar.'}];
     for (const item of messages) {
       const message = document.createElement('article'); message.className = 'chat-message '+item.role;
-      const author = document.createElement('small'); author.textContent = item.role === 'user' ? 'Você' : 'Orçaviva';
+      const author = document.createElement('small'); author.textContent = item.role === 'user' ? 'Você' : 'MoneyRestly';
       const text = document.createElement('p'); text.textContent = item.text;
       message.append(author,text); if (item.report) message.append(reportCard(item.report,item.text)); history.append(message);
     }
@@ -55,12 +55,12 @@
   }
   function error(message) { $('#chat-error').textContent = message; $('#chat-error').hidden = !message; }
   function savePending() {
-    try { if (pending) sessionStorage.setItem('orcaviva.chat.pending.'+context.userId,JSON.stringify(pending)); else sessionStorage.removeItem('orcaviva.chat.pending.'+context.userId); } catch { /* In-memory retries still use the same identifier. */ }
+    try { if (pending) sessionStorage.setItem('moneyrestly.chat.pending.'+context.userId,JSON.stringify(pending)); else sessionStorage.removeItem('moneyrestly.chat.pending.'+context.userId); } catch { /* In-memory retries still use the same identifier. */ }
   }
   async function refresh() {
     if (!context || busy) return;
     const owner = context; setBusy(true); error('');
-    try { await owner.prepare(); if (owner !== context) return; const payload = await FinantoAPI.request('chat',{accountId:owner.userId}); if (owner === context) render(payload); }
+    try { await owner.prepare(); if (owner !== context) return; const payload = await MoneyRestlyAPI.request('chat',{accountId:owner.userId}); if (owner === context) render(payload); }
     catch (e) { if (owner === context) error(e.message); }
     finally { if (owner === context) setBusy(false); }
   }
@@ -92,7 +92,7 @@
       if (!pending || pending.text !== text) {
         pending = {messageId:Array.from(crypto.getRandomValues(new Uint8Array(16)),b => b.toString(16).padStart(2,'0')).join(''),text,revision,chatRevision}; savePending();
       }
-      const payload = await FinantoAPI.request('chat',{method:'POST',body:pending,accountId:owner.userId});
+      const payload = await MoneyRestlyAPI.request('chat',{method:'POST',body:pending,accountId:owner.userId});
       if (owner !== context) return;
       pending = null; savePending(); $('#chat-input').value = ''; render(payload);
       await owner.updated();
@@ -102,7 +102,7 @@
       error(e.message + (e.status === 409 ? ' Clique em Atualizar conversa.' : ' Você pode tentar enviar novamente.'));
     } finally { if (owner === context) { setBusy(false); if (!dialog.hidden && document.activeElement === $('#chat-send')) $('#chat-input').focus(); } }
   });
-  window.OrcavivaChat = Object.freeze({
+  window.MoneyRestlyChat = Object.freeze({
     reset() {
       context = null; pending = null; chatRevision = 0;
       dialog.hidden = true; $('#restore-chat').hidden = true;
@@ -113,7 +113,7 @@
     async open(options, focus = false) {
       if (context?.userId === options.userId) { expand(focus); return; }
       context = options;
-      try { pending = JSON.parse(sessionStorage.getItem('orcaviva.chat.pending.'+options.userId) || 'null'); } catch { pending = null; }
+      try { pending = JSON.parse(sessionStorage.getItem('moneyrestly.chat.pending.'+options.userId) || 'null'); } catch { pending = null; }
       $('#chat-input').value = pending?.text || '';
       expand(); await refresh(); if (context === options && focus && !dialog.hidden) $('#chat-input').focus();
     }

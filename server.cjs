@@ -11,10 +11,12 @@ const { promisify } = require('node:util');
 const Finance = require('./finance.js');
 const { createMailer } = require('./mailer.cjs');
 const { createChatService } = require('./chat-service.cjs');
+const { databasePath } = require('./migrate-database.cjs');
+const { telegramConfig, createTelegram } = require('./telegram.cjs');
 
 const derive = promisify(scrypt);
 const SCRYPT = Object.freeze({ N: 131072, r: 8, p: 1, maxmem: 192 * 1024 * 1024 });
-const COOKIE = 'finanto_session';
+const COOKIE = 'moneyrestly_session';
 const SESSION_MS = 12 * 60 * 60 * 1000;
 const RESET_MS = 30 * 60 * 1000;
 const STATIC_FILES = new Map([
@@ -25,6 +27,7 @@ const STATIC_FILES = new Map([
   ['/finance.js', ['finance.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/api.js', ['api.js', 'text/javascript; charset=utf-8']],
+  ['/migrate-storage.js', ['migrate-storage.js', 'text/javascript; charset=utf-8']],
   ['/tour.js', ['tour.js', 'text/javascript; charset=utf-8']],
   ['/tour.css', ['tour.css', 'text/css; charset=utf-8']],
   ['/chat.js', ['chat.js', 'text/javascript; charset=utf-8']],
@@ -122,7 +125,7 @@ function createServer(options = {}) {
   if (suppliedOrigin) {
     const parsed = new URL(suppliedOrigin);
     if (!['http:', 'https:'].includes(parsed.protocol) || parsed.username || parsed.password || parsed.pathname !== '/' || parsed.search || parsed.hash) {
-      throw new Error('PUBLIC_ORIGIN precisa ser a origem do site, por exemplo https://orcaviva.exemplo.com.');
+      throw new Error('PUBLIC_ORIGIN precisa ser a origem do site, por exemplo https://moneyrestly.exemplo.com.');
     }
     publicOrigin = parsed.origin;
   }
@@ -131,7 +134,7 @@ function createServer(options = {}) {
   }
   const secureCookie = Boolean(publicOrigin && publicOrigin.startsWith('https://'));
   const mailer = options.mailer === undefined ? createMailer() : options.mailer;
-  const dbPath = options.dbPath || process.env.FINANTO_DB || path.join(__dirname, 'data', 'finanto.sqlite');
+  const dbPath = options.dbPath || databasePath(path.join(__dirname, 'data'));
   if (dbPath !== ':memory:') fs.mkdirSync(path.dirname(path.resolve(dbPath)), { recursive: true, mode: 0o700 });
   const db = new DatabaseSync(dbPath);
   db.exec(`
@@ -174,6 +177,8 @@ function createServer(options = {}) {
     );
     CREATE INDEX IF NOT EXISTS password_resets_user ON password_resets(user_id);`);
   const chat = createChatService(db);
+  const botConfig = options.telegram === undefined ? telegramConfig() : options.telegram;
+  const telegram = createTelegram(db, chat, botConfig, () => now(), options.telegramAPI);
   const statements = {
     user: db.prepare('SELECT * FROM users WHERE username = ? COLLATE NOCASE'),
     userById: db.prepare('SELECT * FROM users WHERE id = ?'),
@@ -204,12 +209,13 @@ function createServer(options = {}) {
   const attempts = new Map();
   let activeHashes = 0;
   let activeMail = 0;
+  let activeTelegram = 0;
   let closing = false;
   let databaseClosed = false;
   const dummySalt = randomBytes(16);
   const dummyHash = randomBytes(64);
   function maybeCloseDatabase() {
-    if (closing && activeHashes === 0 && activeMail === 0 && !databaseClosed) { databaseClosed = true; db.close(); }
+    if (closing && activeHashes === 0 && activeMail === 0 && activeTelegram === 0 && !databaseClosed) { databaseClosed = true; db.close(); }
   }
   function cleanup() {
     const timestamp = now();
@@ -255,7 +261,7 @@ function createServer(options = {}) {
   }
 
   function verifyMutation(req, origin, session) {
-    if (req.headers.origin !== origin || req.headers['x-requested-with'] !== 'finanto') {
+    if (req.headers.origin !== origin || req.headers['x-requested-with'] !== 'moneyrestly') {
       throw new HttpError(403, 'A origem do pedido não foi autorizada. Atualize a página.');
     }
     if (session && !safeEqual(req.headers['x-csrf-token'], session.csrf_token)) {
@@ -277,7 +283,7 @@ function createServer(options = {}) {
     if (!session) throw new HttpError(401, 'Entre na sua conta para continuar.');
     // A different tab can change the browser cookie. Bind each data request to the
     // account the calling tab loaded, without ever trusting it as authorization.
-    if (req.headers['x-finanto-account'] !== session.id) {
+    if (req.headers['x-moneyrestly-account'] !== session.id) {
       throw new HttpError(401, 'A conta conectada mudou. Entre novamente para continuar.');
     }
     return session;
@@ -345,6 +351,29 @@ function createServer(options = {}) {
       const origin = expectedOrigin(req);
       // Match the raw path before URL normalization: private files and traversal never reach disk.
       const pathname = (req.url || '').split('?')[0];
+      if (pathname === '/api/telegram/webhook' && req.method === 'POST') {
+        if (!botConfig) throw new HttpError(503, 'Telegram indisponível.');
+        if (!safeEqual(req.headers['x-telegram-bot-api-secret-token'], botConfig.secret)) throw new HttpError(403, 'Webhook não autorizado.');
+        const update = await readJSON(req, 64 * 1024);
+        if (activeTelegram >= 100) throw new HttpError(503, 'Aguarde e tente novamente.');
+        activeTelegram++;
+        try { await telegram.receive(update); }
+        catch { throw new HttpError(503, 'Não foi possível processar a atualização. Tente novamente.'); }
+        finally {activeTelegram--; maybeCloseDatabase();}
+        sendJSON(res,200,{ok:true});
+        return;
+      }
+      if (pathname === '/api/account/telegram' && ['GET','POST','DELETE'].includes(req.method)) {
+        const session = requireSession(req);
+        if (req.method === 'GET') {sendJSON(res,200,telegram.status(session.id)); return;}
+        verifyMutation(req,origin,session);
+        hitLimit('telegram-link:' + session.id,20,res);
+        await readJSON(req,1024);
+        requireSession(req);
+        try { sendJSON(res,200,req.method === 'POST' ? telegram.connect(session.id) : telegram.disconnect(session.id)); }
+        catch (error) {if (error.status) throw new HttpError(error.status,error.message); throw error;}
+        return;
+      }
       if (pathname === '/api/session' && req.method === 'GET') {
         const session = getSession(req);
         sendJSON(res, 200, session ? publicSession(session) : { user: null });
@@ -371,7 +400,7 @@ function createServer(options = {}) {
             await mailer.sendReset({ email, url: `${publicOrigin || origin}/#reset=${token}` });
           } catch {
             if (hash) statements.deleteReset.run(hash);
-            console.error('Orçaviva: não foi possível enviar um e-mail de recuperação. Verifique o serviço SMTP.');
+            console.error('MoneyRestly: não foi possível enviar um e-mail de recuperação. Verifique o serviço SMTP.');
           } finally { activeMail--; maybeCloseDatabase(); }
         });
         sendJSON(res, 200, { message: 'Se existir uma conta com esse e-mail, você receberá um link válido por 30 minutos. Confira também o spam. Se não chegar, tente novamente em alguns minutos.' });
@@ -524,7 +553,7 @@ function createServer(options = {}) {
       if (error instanceof HttpError) sendJSON(res, error.status, { error: error.message, ...error.extra });
       else {
         // Do not include credentials, requests, SQL, or database paths in responses/logs.
-        console.error('Orçaviva: erro interno ao processar um pedido.');
+        console.error('MoneyRestly: erro interno ao processar um pedido.');
         sendJSON(res, 500, { error: 'Não foi possível concluir o pedido. Tente novamente.' });
       }
     }
@@ -544,15 +573,15 @@ if (require.main === module) {
     const host = process.env.HOST || (process.env.NODE_ENV === 'production' ? '127.0.0.1' : '0.0.0.0');
     const server = createServer();
     server.listen(port, host, () => {
-      if (process.env.PUBLIC_ORIGIN) console.log(`Orçaviva disponível em ${process.env.PUBLIC_ORIGIN}`);
+      if (process.env.PUBLIC_ORIGIN) console.log(`MoneyRestly disponível em ${process.env.PUBLIC_ORIGIN}`);
       else {
-        console.log(`Orçaviva neste computador: http://localhost:${port}`);
+        console.log(`MoneyRestly neste computador: http://localhost:${port}`);
         if (host === '0.0.0.0' || host === '::') {
-          for (const address of localIPv4Addresses()) console.log(`Orçaviva na rede local: http://${address}:${port}`);
-        } else if (host !== '127.0.0.1' && host !== 'localhost') console.log(`Orçaviva: http://${host}:${port}`);
+          for (const address of localIPv4Addresses()) console.log(`MoneyRestly na rede local: http://${address}:${port}`);
+        } else if (host !== '127.0.0.1' && host !== 'localhost') console.log(`MoneyRestly: http://${host}:${port}`);
       }
     });
-    server.on('error', error => { console.error('Não foi possível iniciar o Orçaviva:', error.message); process.exitCode = 1; server.close(); });
+    server.on('error', error => { console.error('Não foi possível iniciar o MoneyRestly:', error.message); process.exitCode = 1; server.close(); });
     for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close());
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }

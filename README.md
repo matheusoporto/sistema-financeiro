@@ -1,4 +1,4 @@
-# Orçaviva
+# MoneyRestly
 
 Orçamento + vida: mais clareza para os seus próximos planos.
 
@@ -13,7 +13,7 @@ npm.cmd install
 npm.cmd start
 ```
 
-Também é possível executar `node server.cjs` ou abrir **iniciar-orcaviva.cmd** no Windows depois de instalar as dependências. Acesse **http://localhost:3000** e escolha **Criar conta**. Não existe usuário ou senha padrão. O cadastro exige nome, e-mail único, usuário e senha. O usuário aceita de 3 a 30 letras, números, pontos, traços ou sublinhados; a senha deve ter entre 8 e 128 caracteres e pelo menos um caractere especial, como `!`, `@` ou `#`. Espaço e letras acentuadas não contam como caractere especial.
+Também é possível executar `node server.cjs` ou abrir **iniciar-moneyrestly.cmd** no Windows depois de instalar as dependências. Acesse **http://localhost:3000** e escolha **Criar conta**. Não existe usuário ou senha padrão. O cadastro exige nome, e-mail único, usuário e senha. O usuário aceita de 3 a 30 letras, números, pontos, traços ou sublinhados; a senha deve ter entre 8 e 128 caracteres e pelo menos um caractere especial, como `!`, `@` ou `#`. Espaço e letras acentuadas não contam como caractere especial.
 
 Esta versão precisa do servidor em execução. Abrir `index.html` diretamente apresenta as instruções de acesso e permite exportar dados da versão anterior.
 
@@ -38,9 +38,9 @@ Referências da implementação: [SMTP no Nodemailer](https://nodemailer.com/smt
 
 No primeiro acesso de cada conta, um tour de cinco passos apresenta gastos, parcelas mensais, categorias/gráficos, orçamento/planejamento e o chatbot. O quinto passo mostra uma conversa de exemplo e explica como minimizar e reabrir o chat. É possível voltar, avançar, **Pular tour** ou concluir e abrir o formulário de gasto. As ilustrações não criam compras reais. A conclusão ou o pulo ficam salvos na conta no servidor, inclusive para outros dispositivos. Quem já concluiu pode acessar o novo passo pelo menu **Rever tour**.
 
-## Conversar com o Orçaviva
+## Conversar com o MoneyRestly
 
-Ao entrar na conta, o chat já aparece aberto no canto inferior direito, sem bloquear o painel ou capturar o foco. Use **−** para minimizar e a barra **Conversar com Orçaviva** para reabrir; o texto digitado e o histórico permanecem na conversa ao minimizar. O atalho do menu também expande o chat. O layout se ajusta ao celular. Esta versão interpreta português por regras locais, sem credenciais de IA ou WhatsApp, e salva na mesma conta do painel. O chat fica indisponível no modo de demonstração para não misturar gastos fictícios com a conta real, e desaparece ao sair da conta.
+Ao entrar na conta, o chat já aparece aberto no canto inferior direito, sem bloquear o painel ou capturar o foco. Use **−** para minimizar e a barra **Conversar com MoneyRestly** para reabrir; o texto digitado e o histórico permanecem na conversa ao minimizar. O atalho do menu também expande o chat. O layout se ajusta ao celular. Esta versão interpreta português por regras locais, sem credenciais de IA, e salva na mesma conta do painel. O chat fica indisponível no modo de demonstração para não misturar gastos fictícios com a conta real, e desaparece ao sair da conta.
 
 Experimente uma compra por mensagem:
 
@@ -86,7 +86,7 @@ Para testar sem afetar seus dados, crie uma conta separada. Os testes automatiza
 - `GET /api/chat` e `POST /api/chat`: adaptador do chat web, protegido pela sessão, conta e CSRF. O POST recebe `text`, `messageId`, `revision` e `chatRevision`.
 - `chat.js` e `chat.css`: conversa no site, atualização do painel e downloads de relatórios. O navegador mantém o envio pendente na sessão da aba para repetir o mesmo identificador após uma falha de rede.
 
-A integração com WhatsApp precisará verificar a assinatura da Meta, vincular o remetente a uma conta autorizada e mapear o identificador da mensagem para evitar reprocessamento. Ela poderá reutilizar o serviço de aplicação após resolver essa identidade. Um futuro interpretador de IA deverá produzir dados estruturados, validados por `Finance`, sem decidir a identidade da conta ou executar SQL. Nenhuma rota pública de WhatsApp ou chave de IA foi habilitada nesta etapa.
+A integração com Telegram usa `telegram.cjs`, com webhook autenticado, vínculo por código temporário e recibos persistentes contra duplicidade. A configuração no Railway e o fluxo de cada usuário estão em [TELEGRAM.md](TELEGRAM.md). Um futuro interpretador de IA deverá continuar usando dados estruturados validados por `Finance`, sem decidir a identidade da conta ou executar SQL.
 
 ## Categorias e painel
 
@@ -109,9 +109,9 @@ Se a versão antiga já funcionava no mesmo endereço HTTP, um aviso no painel p
 
 ## Salvamento e contas
 
-A mudança de nome preserva as contas e os gastos existentes. O banco, os identificadores de armazenamento e o protocolo de autenticação mantêm os nomes internos antigos por compatibilidade; não é necessário migrar os dados. O inicializador antigo `iniciar-finanto.cmd` também continua funcionando.
+A marca e os identificadores ativos agora usam MoneyRestly. Na primeira inicializacao, o banco anterior e copiado pelo SQLite para `data/moneyrestly.sqlite`, incluindo os dados confirmados no WAL. Pare a versao anterior antes de iniciar esta versao; o arquivo original fica como copia de seguranca e nao deve voltar a ser usado. Se voce configurou uma variavel de banco antiga, renomeie-a para `MONEYRESTLY_DB` mantendo o caminho. As referencias antigas existem apenas nos arquivos de migracao e seus testes. O navegador migra suas chaves automaticamente sem sobrescrever valores novos; entre novamente depois de atualizar todas as abas.
 
-Os dados ficam em `data/finanto.sqlite`, separados por usuário. O navegador mantém cópias de trabalho por conta e pendências separadas por aba. Alterações são enviadas automaticamente após um pequeno intervalo de 300 ms; o indicador do painel confirma o salvamento no servidor.
+Os dados ficam em `data/moneyrestly.sqlite`, separados por usuário. O navegador mantém cópias de trabalho por conta e pendências separadas por aba. Alterações são enviadas automaticamente após um pequeno intervalo de 300 ms; o indicador do painel confirma o salvamento no servidor.
 
 A conta é atualizada ao entrar, ao voltar à aba e a cada 15 segundos. Se a conexão cair, pendências são preservadas localmente para retomar o envio. Se outro dispositivo editar os dados antes, o painel oferece download das pendências e carregamento da versão atual, sem sobrescrever silenciosamente. O login deve ser validado novamente ao reabrir o painel.
 
@@ -125,16 +125,16 @@ Para uso público, hospede o processo Node com armazenamento persistente e proxy
 
 ```powershell
 $env:NODE_ENV = 'production'
-$env:PUBLIC_ORIGIN = 'https://orcaviva.seu-dominio.com'
+$env:PUBLIC_ORIGIN = 'https://moneyrestly.seu-dominio.com'
 $env:HOST = '127.0.0.1'
 $env:PORT = '3000'
-$env:FINANTO_DB = 'C:/dados/finanto/finanto.sqlite'
+$env:MONEYRESTLY_DB = 'C:/dados/moneyrestly/moneyrestly.sqlite'
 node server.cjs
 ```
 
 O proxy deve encaminhar para o processo Node. `PUBLIC_ORIGIN` deve ser a origem exata do site, sem caminho, e ativa cookies Secure quando usa HTTPS. Produção recusa iniciar sem uma origem HTTPS e mantém `HOST=127.0.0.1` como padrão.
 
-Em uso local, `npm.cmd start` e `iniciar-orcaviva.cmd` agora escutam em `0.0.0.0` e mostram os IPs disponíveis. Em outro aparelho conectado à mesma rede, abra `http://IP-DO-COMPUTADOR:3000`. O computador com o servidor precisa continuar ligado. `localhost` continua funcionando no próprio computador; o login em cada endereço usa sua própria sessão, mas acessa o mesmo banco de contas.
+Em uso local, `npm.cmd start` e `iniciar-moneyrestly.cmd` agora escutam em `0.0.0.0` e mostram os IPs disponíveis. Em outro aparelho conectado à mesma rede, abra `http://IP-DO-COMPUTADOR:3000`. O computador com o servidor precisa continuar ligado. `localhost` continua funcionando no próprio computador; o login em cada endereço usa sua própria sessão, mas acessa o mesmo banco de contas.
 
 Não é necessário fixar `PUBLIC_ORIGIN` para a rede local: são aceitos os IPs IPv4 atuais do computador, seu nome de rede e localhost, na porta do servidor. As verificações de origem e CSRF continuam ativas. Para voltar ao acesso somente pelo próprio computador, configure `HOST=127.0.0.1` antes de iniciar.
 

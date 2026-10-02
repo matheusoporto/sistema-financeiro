@@ -27,12 +27,12 @@ function createChatService(db) {
       typeof body.messageId !== 'string' || !/^[a-zA-Z0-9_-]{10,100}$/.test(body.messageId) ||
       !Number.isSafeInteger(body.revision) || body.revision < 0 || !Number.isSafeInteger(body.chatRevision) || body.chatRevision < 0) throw fail(400,'A mensagem é inválida. Use até 1.000 caracteres.');
     const requestHash = createHash('sha256').update(body.text).digest('hex');
-    db.exec('BEGIN IMMEDIATE');
+    db.exec('SAVEPOINT chat_message');
     try {
       const previous = receipt.get(userId,body.messageId);
       if (previous) {
         if (previous.request_hash !== requestHash) throw fail(409,'Este identificador já foi utilizado por outra mensagem. Atualize a conversa.');
-        db.exec('COMMIT'); return JSON.parse(previous.response);
+        db.exec('RELEASE chat_message'); return JSON.parse(previous.response);
       }
       const row = conversation.get(userId);
       const current = account.get(userId);
@@ -51,8 +51,8 @@ function createChatService(db) {
       const response = {history,chatRevision,changed:result.changed,revision:current.revision+(result.changed ? 1 : 0)};
       db.prepare('INSERT INTO chat_receipts VALUES (?,?,?,?)').run(userId,body.messageId,requestHash,JSON.stringify(response));
       db.prepare('DELETE FROM chat_receipts WHERE user_id = ? AND rowid NOT IN (SELECT rowid FROM chat_receipts WHERE user_id = ? ORDER BY rowid DESC LIMIT 100)').run(userId,userId);
-      db.exec('COMMIT'); return response;
-    } catch (error) { db.exec('ROLLBACK'); throw error; }
+      db.exec('RELEASE chat_message'); return response;
+    } catch (error) { db.exec('ROLLBACK TO chat_message; RELEASE chat_message'); throw error; }
   }
   return {get,send};
 }

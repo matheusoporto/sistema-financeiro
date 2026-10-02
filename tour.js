@@ -10,7 +10,7 @@
     },
     {
       title: 'Parcelou? A gente distribui.',
-      description: 'Informe o valor total e o número de parcelas. O Orçaviva calcula cada uma e distribui nos próximos meses. Use as abas para acompanhar.',
+      description: 'Informe o valor total e o número de parcelas. O MoneyRestly calcula cada uma e distribui nos próximos meses. Use as abas para acompanhar.',
       preview: '<div class="tour-example"><span class="tour-pill">Uma compra de R$ 300 em 3×</span><div class="tour-months"><div><small>JAN</small><strong>R$ 100</strong></div><div><small>FEV</small><strong>R$ 100</strong></div><div><small>MAR</small><strong>R$ 100</strong></div></div><p>Um mês de cada vez. Tudo no lugar.</p></div>'
     },
     {
@@ -26,7 +26,7 @@
     {
       title: 'Organize seus gastos conversando.',
       description: 'O chat já fica aberto no canto inferior. Escreva uma compra ou peça um relatório. Ele salva na sua conta e pergunta se faltar algo. Use o botão − para minimizar e a barra da conversa para reabrir.',
-      preview: '<div class="tour-chat-example"><div class="tour-chat-heading">Orçaviva <span>−</span></div><p class="tour-chat-user">Gastei 85,90 no mercado via Pix</p><p class="tour-chat-answer">✓ Registrei em Mercado.<br>Você pode pedir um relatório ou desfazer.</p><small>Uma mensagem. Tudo organizado.</small></div>'
+      preview: '<div class="tour-chat-example"><div class="tour-chat-heading">MoneyRestly <span>−</span></div><p class="tour-chat-user">Gastei 85,90 no mercado via Pix</p><p class="tour-chat-answer">✓ Registrei em Mercado.<br>Você pode pedir um relatório ou desfazer.</p><small>Uma mensagem. Tudo organizado.</small></div>'
     }
   ];
   const dialog = $('#tour-dialog');
@@ -52,7 +52,7 @@
     dialog.querySelectorAll('button').forEach(button => { button.disabled = true; });
     $('#tour-error').hidden = true;
     try {
-      await window.FinantoAPI.request('account/tour', { method: 'POST', body: {}, accountId: owner.id });
+      await window.MoneyRestlyAPI.request('account/tour', { method: 'POST', body: {}, accountId: owner.id });
       if (user !== owner || !dialog.open) return;
       owner.tourCompleted = true;
       dialog.close();
@@ -72,7 +72,7 @@
   $('#tour-create').onclick = () => finish(true);
   dialog.addEventListener('cancel', event => { event.preventDefault(); finish(); });
   dialog.addEventListener('close', () => { user = null; });
-  window.OrcavivaTour = Object.freeze({
+  window.MoneyRestlyTour = Object.freeze({
     start(account) {
       if (!account || busy || dialog.open) return;
       user = account; step = 0;

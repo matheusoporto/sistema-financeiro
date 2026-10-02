@@ -12,7 +12,7 @@ const { createServer } = require('./server.cjs');
 const { spawn } = require('node:child_process');
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const output = fs.mkdtempSync(path.join(os.tmpdir(), 'finanto-smoke-'));
+const output = fs.mkdtempSync(path.join(os.tmpdir(), 'moneyrestly-smoke-'));
 const edgePath = process.env.EDGE_PATH || 'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe';
 let appURL;
 let server;
@@ -56,7 +56,7 @@ async function field(selector, value) {
 }
 async function read(selector) { return evaluate(`document.querySelector(${JSON.stringify(selector)}).textContent.trim().replace(/\\s+/g,' ')`); }
 async function synced() { await waitFor(() => evaluate(`document.querySelector('#save-status').textContent.includes('Salvo na sua conta')`), 'server save'); }
-async function state() { await synced(); return evaluate(`(async () => { const session = await FinantoAPI.request('session'); return (await FinantoAPI.request('data',{accountId:session.user.id})).data; })()`); }
+async function state() { await synced(); return evaluate(`(async () => { const session = await MoneyRestlyAPI.request('session'); return (await MoneyRestlyAPI.request('data',{accountId:session.user.id})).data; })()`); }
 async function reload() {
   await cdp('Page.reload', { ignoreCache: true });
   await sleep(250);
@@ -111,7 +111,7 @@ async function addExpense({ name, amount, category, date, installments = 1, note
 }
 
 (async () => {
-  server = createServer({dbPath:path.join(output,'test.sqlite'),production:false,publicOrigin:'',mailer:{sendReset:async message => recoveryMessages.push(message)}});
+  server = createServer({dbPath:path.join(output,'test.sqlite'),production:false,publicOrigin:'',mailer:{sendReset:async message => recoveryMessages.push(message)},telegram:{token:'123:test',username:'moneyrestly_test_bot',secret:'s'.repeat(32)},telegramAPI:async()=>({})});
   await new Promise(resolve => server.listen(0,process.env.BROWSER_HOST ? '0.0.0.0' : '127.0.0.1',resolve));
   appURL = `http://${process.env.BROWSER_HOST || '127.0.0.1'}:${server.address().port}`;
   edge = spawn(edgePath, ['--headless=new', '--disable-gpu', '--remote-debugging-port=0', `--user-data-dir=${path.join(output, 'profile')}`, '--no-first-run', '--no-default-browser-check', 'about:blank'], { windowsHide: true, stdio: ['ignore', 'ignore', 'pipe'] });
@@ -195,9 +195,29 @@ async function addExpense({ name, amount, category, date, installments = 1, note
     await click('#tour-next'); assert.ok((await read('#tour-counter')).includes('2 DE 5'));
     await click('#tour-back'); assert.ok((await read('#tour-counter')).includes('1 DE 5'));
     await click('#tour-skip'); await waitFor(() => evaluate("!document.querySelector('#tour-dialog').open"),'skip saved');
-    assert.equal(await evaluate("FinantoAPI.request('session').then(session => session.user.tourCompleted)"),true);
+    assert.equal(await evaluate("MoneyRestlyAPI.request('session').then(session => session.user.tourCompleted)"),true);
     await reload(); await loggedIn();
     assert.equal(await evaluate("document.querySelector('#tour-dialog').open"),false);
+  });
+  await test('Telegram account dialog links and disconnects without exposing the bot token',async () => {
+    await click('#open-telegram');
+    await waitFor(()=>evaluate("!document.querySelector('#telegram-connect').hidden && !document.querySelector('#telegram-connect').disabled"),'telegram ready');
+    await click('#telegram-connect');
+    await waitFor(()=>evaluate("!document.querySelector('#telegram-link').hidden"),'telegram link');
+    const url = await evaluate("document.querySelector('#telegram-link').href");
+    assert.equal(new URL(url).hostname,'t.me');
+    const token = new URL(url).searchParams.get('start');
+    const response=await fetch(appURL+'/api/telegram/webhook',{method:'POST',headers:{'Content-Type':'application/json','X-Telegram-Bot-Api-Secret-Token':'s'.repeat(32)},body:JSON.stringify({update_id:1,message:{chat:{id:456,type:'private'},from:{id:456,is_bot:false},text:'/start '+token}})});
+    assert.equal(response.status,200);
+    await click('#telegram-refresh');
+    await waitFor(()=>evaluate("!document.querySelector('#telegram-disconnect').hidden"),'telegram connected');
+    await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:true});
+    await screenshot('telegram-mobile.png');
+    assert.equal(await evaluate("document.documentElement.scrollWidth <= innerWidth"),true);
+    await click('#telegram-disconnect');
+    await waitFor(()=>evaluate("!document.querySelector('#telegram-connect').hidden"),'telegram disconnected');
+    await click('[data-close="telegram-dialog"]');
+    await cdp('Emulation.setDeviceMetricsOverride',{width:1440,height:1100,deviceScaleFactor:1,mobile:false});
   });
   let customId;
   const customLabel = 'Transporte <urbano> "QA"';
@@ -324,17 +344,17 @@ async function addExpense({ name, amount, category, date, installments = 1, note
     assert.equal((await state()).customCategories[0].label,customLabel);
   });
   await test('same account in another browser context sees the server data',async () => {
-    const response = await fetch(appURL+'/api/login',{method:'POST',headers:{Origin:appURL,'X-Requested-With':'finanto','Content-Type':'application/json'},body:JSON.stringify({username:'matheus.qa',password})});
+    const response = await fetch(appURL+'/api/login',{method:'POST',headers:{Origin:appURL,'X-Requested-With':'moneyrestly','Content-Type':'application/json'},body:JSON.stringify({username:'matheus.qa',password})});
     assert.equal(response.status,200);
     const session = await response.json(); const cookie = response.headers.get('set-cookie').split(';')[0];
     assert.equal(session.user.tourCompleted,true);
-    const dataResponse = await fetch(appURL+'/api/data',{headers:{Cookie:cookie,'X-Finanto-Account':session.user.id}});
+    const dataResponse = await fetch(appURL+'/api/data',{headers:{Cookie:cookie,'X-MoneyRestly-Account':session.user.id}});
     const data = await dataResponse.json();
     assert.equal(data.data.customCategories[0].label,customLabel);
     assert.equal(data.data.expenses[0].totalCents,12000);
   });
   await test('login in another tab renews the first tabs CSRF token automatically',async () => {
-    await inAnotherTab(`FinantoAPI.request('login',{method:'POST',body:{username:'matheus.qa',password:${JSON.stringify(password)}}})`);
+    await inAnotherTab(`MoneyRestlyAPI.request('login',{method:'POST',body:{username:'matheus.qa',password:${JSON.stringify(password)}}})`);
     await field('#search-expenses','passe'); await synced();
     assert.equal((await state()).preferences.search,'passe');
     await click('#clear-filters'); await synced();

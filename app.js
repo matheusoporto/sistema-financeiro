@@ -1,12 +1,12 @@
-/* Orçaviva — Painel, categorias e acesso à conta. */
+/* MoneyRestly — Painel, categorias e acesso à conta. */
 (() => {
   'use strict';
 
   const F = window.Finance;
-  const API = window.FinantoAPI;
+  const API = window.MoneyRestlyAPI;
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => [...document.querySelectorAll(selector)];
-  const LEGACY_KEY = 'finanto.data.v1';
+  const LEGACY_KEY = 'moneyrestly.data.v1';
   let MAIN_KEY = '';
   let DEMO_KEY = '';
   let MODE_KEY = '';
@@ -129,7 +129,7 @@
       warning.textContent = problem ? status.message : status.localError || '';
       if (problem) {
         const backup = document.createElement('button'); backup.className = 'text-button'; backup.textContent = 'Baixar alterações pendentes';
-        backup.onclick = () => download(JSON.stringify(accountStore.data || state,null,2),'orcaviva-alteracoes-pendentes.json','application/json');
+        backup.onclick = () => download(JSON.stringify(accountStore.data || state,null,2),'moneyrestly-alteracoes-pendentes.json','application/json');
         warning.append(backup);
         const retry = document.createElement('button'); retry.className = 'text-button';
         retry.textContent = status.kind === 'conflict' ? 'Carregar versão do servidor' : 'Tentar salvar novamente';
@@ -145,7 +145,7 @@
     if (recoveryRaw) {
       const button = document.createElement('button');
       button.className = 'text-button'; button.textContent = 'Baixar cópia e continuar';
-      button.onclick = () => { download(recoveryRaw, 'orcaviva-recuperacao.json', 'application/json'); recoveryRaw = null; persist(); toast('Cópia exportada. O salvamento automático está ativo novamente.'); };
+      button.onclick = () => { download(recoveryRaw, 'moneyrestly-recuperacao.json', 'application/json'); recoveryRaw = null; persist(); toast('Cópia exportada. O salvamento automático está ativo novamente.'); };
       warning.append(button);
     }
     $('#save-status').innerHTML = storageError ? `${icon('info')}Salvamento requer atenção` : '<span class="status-dot"></span>Demonstração salva no navegador';
@@ -404,7 +404,7 @@
   function exportCSV() {
     const safeCell = (value) => { let text = String(value ?? ''); if (/^[\s]*[=+@-]/.test(text)) text = `'${text}`; return `"${text.replace(/"/g,'""')}"`; };
     const rows = [['Compra','Categoria','Data','Parcela','Valor (R$)','Total da compra (R$)','Observação'], ...filteredEntries.map((entry) => [entry.name,category(entry.category).label,entry.date.split('-').reverse().join('/'),`${entry.installmentNumber}/${entry.installments}`,plainMoney(entry.amountCents),plainMoney(entry.totalCents),entry.notes])];
-    download('\uFEFF'+rows.map((row) => row.map(safeCell).join(';')).join('\r\n'),`orcaviva-${prefs().month}${demoMode ? '-demo' : ''}.csv`,'text/csv;charset=utf-8');
+    download('\uFEFF'+rows.map((row) => row.map(safeCell).join(';')).join('\r\n'),`moneyrestly-${prefs().month}${demoMode ? '-demo' : ''}.csv`,'text/csv;charset=utf-8');
     toast('CSV exportado com os gastos do filtro atual.');
   }
   function generateDemo() {
@@ -536,7 +536,7 @@
   });
   $('#remove-budget').onclick = () => { if (staleDialog()) return; delete state.budgets[budgetMonth]; $('#budget-dialog').close(); render(); persist(); toast('Limite removido para este mês.'); };
   $('#export-csv').onclick = exportCSV;
-  $('#export-backup').onclick = () => { download(JSON.stringify(state,null,2),`orcaviva-backup-${F.todayISO()}${demoMode ? '-demo' : ''}.json`,'application/json'); toast('Backup exportado. Guarde o arquivo em um lugar seguro.'); };
+  $('#export-backup').onclick = () => { download(JSON.stringify(state,null,2),`moneyrestly-backup-${F.todayISO()}${demoMode ? '-demo' : ''}.json`,'application/json'); toast('Backup exportado. Guarde o arquivo em um lugar seguro.'); };
   $('#import-backup').onclick = () => { $('#import-file').value = ''; $('#import-file').click(); };
   $('#import-file').addEventListener('change',async (event) => {
     const file = event.target.files[0]; if (!file) return;
@@ -550,7 +550,7 @@
     try {
       await accountStore.flush();
       if (prefs().month > '9999-07') prefs().month = '9999-07';
-      const sample = generateDemo(); demoMode = true; window.OrcavivaChat.reset(); state = sample; recoveryRaw = null; storageError = ''; render(); persist(); toast('Demonstração ativada. Explore todos os recursos!');
+      const sample = generateDemo(); demoMode = true; window.MoneyRestlyChat.reset(); state = sample; recoveryRaw = null; storageError = ''; render(); persist(); toast('Demonstração ativada. Explore todos os recursos!');
     } catch (error) { toast(error.message,true); }
   };
   $('#exit-demo').onclick = () => {
@@ -596,7 +596,7 @@
     $('#reset-submit').textContent = busy ? 'Aguarde…' : 'Salvar nova senha →';
   }
   function lockAccount(message = '') {
-    window.OrcavivaChat.reset();
+    window.MoneyRestlyChat.reset();
     authGeneration++;
     clearInterval(syncInterval);
     accountStore?.close(); accountStore = null;
@@ -615,7 +615,7 @@
     $('#login-username').focus();
   }
   async function enterAccount(session) {
-    window.OrcavivaChat.reset();
+    window.MoneyRestlyChat.reset();
     const generation = ++authGeneration;
     accountStore?.close(); clearInterval(syncInterval);
     currentUser = session.user;
@@ -629,8 +629,8 @@
     });
     accountStore = store;
     MAIN_KEY = store.key;
-    DEMO_KEY = `finanto.account.${currentUser.id}.demo.v1`;
-    MODE_KEY = `finanto.account.${currentUser.id}.demo.active`;
+    DEMO_KEY = `moneyrestly.account.${currentUser.id}.demo.v1`;
+    MODE_KEY = `moneyrestly.account.${currentUser.id}.demo.active`;
     try {
       const data = await store.load();
       if (generation !== authGeneration) return;
@@ -646,7 +646,7 @@
       $('#main-content').setAttribute('tabindex','-1'); $('#main-content').focus({preventScroll:true});
       syncInterval = setInterval(refreshAccount,15000);
       openChat();
-      if (!currentUser.tourCompleted) window.OrcavivaTour.start(currentUser);
+      if (!currentUser.tourCompleted) window.MoneyRestlyTour.start(currentUser);
     } catch (error) {
       store.close(); currentUser = null; accountStore = null;
       throw error;
@@ -681,7 +681,7 @@
     catch { return false; }
   }
   $('#legacy-export').onclick = () => {
-    try { const raw = localStorage.getItem(LEGACY_KEY); if (!raw) return; download(raw,`orcaviva-backup-anterior-${F.todayISO()}.json`,'application/json'); }
+    try { const raw = localStorage.getItem(LEGACY_KEY); if (!raw) return; download(raw,`moneyrestly-backup-anterior-${F.todayISO()}.json`,'application/json'); }
     catch { authMessage('Não foi possível ler os dados anteriores deste navegador.',true); }
   };
   $('#migrate-local').onclick = () => {
@@ -727,12 +727,50 @@
     } catch (error) { authMessage(error.message,true); }
     finally { setAuthBusy(false); }
   });
-  $('#replay-tour').onclick = () => { if (currentUser) window.OrcavivaTour.start(currentUser); };
+  $('#replay-tour').onclick = () => { if (currentUser) window.MoneyRestlyTour.start(currentUser); };
+  let telegramBusy = false;
+  async function telegramAction(method = 'GET') {
+    if (!currentUser || telegramBusy) return;
+    const owner = currentUser;
+    telegramBusy = true;
+    $('#telegram-error').hidden = true;
+    for (const id of ['telegram-connect','telegram-disconnect','telegram-refresh']) $('#'+id).disabled = true;
+    try {
+      const result = await API.request('account/telegram',{method,accountId:owner.id,...(method === 'GET' ? {} : {body:{}})});
+      if (currentUser !== owner) return;
+      if (method === 'POST') {
+        $('#telegram-link').href = result.url;
+        $('#telegram-link').hidden = false;
+        $('#telegram-status').textContent = 'Abra o link e toque em Iniciar no Telegram. O link vale por 10 minutos e só pode ser usado uma vez. Depois, atualize o status aqui.';
+      } else {
+        $('#telegram-status').textContent = result.linked ? 'Telegram conectado à sua conta. Envie um gasto ou peça um relatório ao bot.' : result.enabled ? 'Nenhum Telegram conectado. Gere um link para começar.' : 'A integração ainda precisa ser configurada pelo responsável pelo site.';
+        $('#telegram-connect').hidden = !result.enabled || result.linked;
+        $('#telegram-disconnect').hidden = !result.linked;
+        if (result.linked || method === 'DELETE') {$('#telegram-link').hidden = true; $('#telegram-link').removeAttribute('href');}
+      }
+    } catch (error) {
+      if (currentUser === owner) {$('#telegram-error').textContent = error.message; $('#telegram-error').hidden = false;}
+    } finally {
+      telegramBusy = false;
+      for (const id of ['telegram-connect','telegram-disconnect','telegram-refresh']) $('#'+id).disabled = false;
+    }
+  }
+  $('#open-telegram').onclick = () => {
+    if (!currentUser) return;
+    if (demoMode) {toast('Saia da demonstração para conectar sua conta ao Telegram.'); return;}
+    $('#telegram-link').hidden = true; $('#telegram-link').removeAttribute('href');
+    $('#telegram-connect').hidden = true; $('#telegram-disconnect').hidden = true;
+    $('#telegram-status').textContent = 'Consultando conexão…';
+    $('#telegram-dialog').showModal(); telegramAction();
+  };
+  $('#telegram-connect').onclick = () => telegramAction('POST');
+  $('#telegram-disconnect').onclick = () => telegramAction('DELETE');
+  $('#telegram-refresh').onclick = () => telegramAction();
   function openChat(focus = false) {
     if (!currentUser) return;
     if (demoMode) { toast('Saia da demonstração para conversar sobre sua conta real.'); return; }
     const store = accountStore, user = currentUser;
-    window.OrcavivaChat.open({userId:user.id,
+    window.MoneyRestlyChat.open({userId:user.id,
       prepare:async () => {
         if (demoMode || currentUser !== user || store.closed) throw new Error('Volte à sua conta para usar o chat.');
         await store.flush(); await store.refresh();

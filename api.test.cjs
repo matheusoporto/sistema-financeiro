@@ -19,7 +19,7 @@ function client(remote,local = storage(),session = storage()) {
     return {ok:result.status < 400,status:result.status,json:async () => json(result.body)};
   };
   sources.forEach(source => vm.runInContext(source,context));
-  return {api:context.FinantoAPI,local,session,json};
+  return {api:context.MoneyRestlyAPI,local,session,json};
 }
 function service() {
   const server = {data:empty(),revision:0,offline:false,calls:[]};

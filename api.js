@@ -14,7 +14,7 @@
     try {
       response = await fetch(`/api/${path}`, {
         method:options.method || 'GET', credentials:'same-origin', cache:'no-store',
-        headers:{'Content-Type':'application/json','X-Requested-With':'finanto',...(csrfToken ? {'X-CSRF-Token':csrfToken} : {}),...(options.accountId ? {'X-Finanto-Account':options.accountId} : {})},
+        headers:{'Content-Type':'application/json','X-Requested-With':'moneyrestly',...(csrfToken ? {'X-CSRF-Token':csrfToken} : {}),...(options.accountId ? {'X-MoneyRestly-Account':options.accountId} : {})},
         ...(options.body === undefined ? {} : {body:JSON.stringify(options.body)}),
         signal:AbortSignal.timeout(15000),
       });
@@ -33,7 +33,7 @@
   class AccountStore {
     constructor(userId, callbacks = {}) {
       this.userId = userId;
-      this.key = `finanto.account.${userId}.data.v1`;
+      this.key = `moneyrestly.account.${userId}.data.v1`;
       this.pendingKey = `${this.key}.pending.${cacheId()}`;
       this.pointerKey = `${this.key}.pending-pointer`;
       this.recoveredPending = null;
@@ -206,5 +206,5 @@
       if (clearCache) { try { localStorage.removeItem(this.key); } catch { /* A próxima conta usa uma chave própria. */ } }
     }
   }
-  window.FinantoAPI = Object.freeze({request,AccountStore,APIError});
+  window.MoneyRestlyAPI = Object.freeze({request,AccountStore,APIError});
 })();
