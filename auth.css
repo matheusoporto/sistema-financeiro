@@ -33,7 +33,7 @@
 .auth-brand .brand-symbol {
   width: 32px;
   height: 36px;
-  background: #d7efb9;
+  background: transparent;
   color: #185c47;
 }
 
@@ -176,8 +176,8 @@
   .auth-story { display: none; }
   .auth-panel { min-height: 100vh; min-height: 100dvh; align-items: flex-start; padding: 34px 25px 30px; }
   .auth-panel-inner { max-width: 400px; }
-  .auth-mobile-brand { display: block; margin-bottom: 39px; color: #185c47; font-size: 34px; font-weight: 750; line-height: 1.2; letter-spacing: -1.8px; }
-  .auth-mobile-brand span { color: #83a663; }
+  .auth-mobile-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 39px; color: #185c47; font-size: 34px; font-weight: 750; line-height: 1.2; letter-spacing: -1.8px; }
+  .auth-mobile-brand .brand-dot { color: #83a663; }
   .auth-tabs { margin-bottom: 30px; }
   .auth-form .form-field input { font-size: 16px; }
   .auth-intro { margin-bottom: 25px; }
