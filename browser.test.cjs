@@ -191,9 +191,9 @@ async function addExpense({ name, amount, category, date, installments = 1, note
   await test('first login tour is short, skippable and saved on the account',async () => {
     await waitFor(() => evaluate("document.querySelector('#tour-dialog').open"),'first tour');
     await screenshot('tour-desktop.png');
-    assert.ok((await read('#tour-counter')).includes('1 DE 5'));
-    await click('#tour-next'); assert.ok((await read('#tour-counter')).includes('2 DE 5'));
-    await click('#tour-back'); assert.ok((await read('#tour-counter')).includes('1 DE 5'));
+    assert.ok((await read('#tour-counter')).includes('1 DE 6'));
+    await click('#tour-next'); assert.ok((await read('#tour-counter')).includes('2 DE 6'));
+    await click('#tour-back'); assert.ok((await read('#tour-counter')).includes('1 DE 6'));
     await click('#tour-skip'); await waitFor(() => evaluate("!document.querySelector('#tour-dialog').open"),'skip saved');
     assert.equal(await evaluate("MoneyRestlyAPI.request('session').then(session => session.user.tourCompleted)"),true);
     await reload(); await loggedIn();
@@ -375,9 +375,19 @@ async function addExpense({ name, amount, category, date, installments = 1, note
     await screenshot('tour-mobile.png');
     assert.ok(await evaluate("(() => {const r=document.querySelector('#tour-dialog').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.bottom<=innerHeight;})()"));
     await click('#tour-next'); await click('#tour-next'); await click('#tour-next'); await click('#tour-next');
-    assert.ok((await read('#tour-counter')).includes('5 DE 5'));
+    assert.ok((await read('#tour-counter')).includes('5 DE 6'));
     assert.ok((await read('#tour-description')).includes('minimizar'));
     await screenshot('tour-chat-mobile.png');
+    assert.equal(await evaluate("document.querySelector('#tour-create').hidden"),true);
+    await click('#tour-next');
+    assert.ok((await read('#tour-counter')).includes('6 DE 6'));
+    assert.ok((await read('#tour-description')).includes('Conectar Telegram'));
+    assert.ok((await read('#tour-description')).includes('10 minutos'));
+    await screenshot('tour-telegram-mobile.png');
+    assert.ok(await evaluate("(() => {const r=document.querySelector('#tour-dialog').getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.bottom<=innerHeight;})()"));
+    await click('#tour-back');
+    assert.ok((await read('#tour-description')).includes('minimizar'));
+    await click('#tour-next');
     await click('#tour-create');
     await waitFor(() => evaluate("document.querySelector('#expense-dialog').open"),'tour opens real expense form');
     await click('[data-close="expense-dialog"]');

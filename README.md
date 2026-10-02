@@ -36,7 +36,7 @@ Referências da implementação: [SMTP no Nodemailer](https://nodemailer.com/smt
 
 ## Tour inicial
 
-No primeiro acesso de cada conta, um tour de cinco passos apresenta gastos, parcelas mensais, categorias/gráficos, orçamento/planejamento e o chatbot. O quinto passo mostra uma conversa de exemplo e explica como minimizar e reabrir o chat. É possível voltar, avançar, **Pular tour** ou concluir e abrir o formulário de gasto. As ilustrações não criam compras reais. A conclusão ou o pulo ficam salvos na conta no servidor, inclusive para outros dispositivos. Quem já concluiu pode acessar o novo passo pelo menu **Rever tour**.
+No primeiro acesso de cada conta, um tour de seis passos apresenta gastos, parcelas mensais, categorias/gráficos, orçamento/planejamento, o chatbot e o Telegram. O quinto passo explica como minimizar e reabrir o chat. O sexto mostra como usar **Conectar Telegram**, iniciar o bot e enviar gastos ou pedir relatórios em conversa privada, com um aviso sobre a validade e o sigilo do link. É possível voltar, avançar, **Pular tour** ou concluir e abrir o formulário de gasto. As ilustrações não criam compras nem vínculos reais. A conclusão ou o pulo ficam salvos na conta no servidor, inclusive para outros dispositivos. Quem já concluiu pode acessar o novo passo pelo menu **Rever tour**.
 
 ## Conversar com o MoneyRestly
 

@@ -27,6 +27,11 @@
       title: 'Organize seus gastos conversando.',
       description: 'O chat já fica aberto no canto inferior. Escreva uma compra ou peça um relatório. Ele salva na sua conta e pergunta se faltar algo. Use o botão − para minimizar e a barra da conversa para reabrir.',
       preview: '<div class="tour-chat-example"><div class="tour-chat-heading">MoneyRestly <span>−</span></div><p class="tour-chat-user">Gastei 85,90 no mercado via Pix</p><p class="tour-chat-answer">✓ Registrei em Mercado.<br>Você pode pedir um relatório ou desfazer.</p><small>Uma mensagem. Tudo organizado.</small></div>'
+    },
+    {
+      title: 'Leve seus gastos para o Telegram.',
+      description: 'No menu, abra Conectar Telegram e gere seu link. Toque em Iniciar no bot para vincular sua conta. Depois, envie gastos ou peça relatórios na conversa privada. O link vale 10 minutos: não compartilhe.',
+      preview: '<div class="tour-chat-example"><div class="tour-chat-heading">MoneyRestly no Telegram <span>↗</span></div><span class="tour-pill">Conectar Telegram → Iniciar</span><p class="tour-chat-user">Relatório deste mês</p><p class="tour-chat-answer">Seus gastos e parcelas, direto na conversa.</p><small>Você pode desconectar pelo site quando quiser.</small></div>'
     }
   ];
   const dialog = $('#tour-dialog');
