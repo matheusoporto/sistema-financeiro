@@ -31,7 +31,9 @@ const STATIC_FILES = new Map([
   ['/tour.js', ['tour.js', 'text/javascript; charset=utf-8']],
   ['/tour.css', ['tour.css', 'text/css; charset=utf-8']],
   ['/chat.js', ['chat.js', 'text/javascript; charset=utf-8']],
-  ['/chat.css', ['chat.css', 'text/css; charset=utf-8']]
+  ['/chat.css', ['chat.css', 'text/css; charset=utf-8']],
+  ['/mobile-nav.js', ['mobile-nav.js', 'text/javascript; charset=utf-8']],
+  ['/mobile-nav.css', ['mobile-nav.css', 'text/css; charset=utf-8']]
 ]);
 
 class HttpError extends Error {

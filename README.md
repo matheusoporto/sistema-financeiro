@@ -40,7 +40,7 @@ No primeiro acesso de cada conta, um tour de seis passos apresenta gastos, parce
 
 ## Conversar com o MoneyRestly
 
-Ao entrar na conta, o chat já aparece aberto no canto inferior direito, sem bloquear o painel ou capturar o foco. Use **−** para minimizar e a barra **Conversar com MoneyRestly** para reabrir; o texto digitado e o histórico permanecem na conversa ao minimizar. O atalho do menu também expande o chat. O layout se ajusta ao celular. Esta versão interpreta português por regras locais, sem credenciais de IA, e salva na mesma conta do painel. O chat fica indisponível no modo de demonstração para não misturar gastos fictícios com a conta real, e desaparece ao sair da conta.
+Ao entrar na conta pelo computador, o chat aparece aberto no canto inferior direito, sem bloquear o painel ou capturar o foco. No celular, ele inicia minimizado. O menu mobile também começa fechado: toque no botão de três traços para abrir a barra lateral, com a mesma ordem do desktop. Feche pelo botão, pelo fundo ou com Escape; escolher uma opção também fecha o menu. Use **−** para minimizar e a barra **Conversar com MoneyRestly** para reabrir; o texto digitado e o histórico permanecem na conversa ao minimizar. O atalho do menu também expande o chat. O layout se ajusta ao celular. Esta versão interpreta português por regras locais, sem credenciais de IA, e salva na mesma conta do painel. O chat fica indisponível no modo de demonstração para não misturar gastos fictícios com a conta real, e desaparece ao sair da conta.
 
 Experimente uma compra por mensagem:
 

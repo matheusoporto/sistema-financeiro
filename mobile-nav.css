@@ -1,0 +1,21 @@
+.mobile-topbar, .mobile-menu-close, .menu-backdrop { display: none; }
+@media (max-width: 760px) {
+  .mobile-topbar { display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--border); background: var(--surface); }
+  .mobile-topbar .brand { font-size: 23px; }
+  #mobile-menu-toggle, .mobile-menu-close { min-width: 44px; min-height: 44px; color: var(--green); }
+  #mobile-menu-toggle svg { width: 24px; height: 24px; }
+  #main-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 80; width: min(300px, calc(100vw - 48px)); height: 100dvh; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 26px 18px; border: 0; overflow-y: auto; overscroll-behavior: contain; visibility: hidden; transform: translateX(-100%); }
+  #main-sidebar.is-open { visibility: visible; transform: translateX(0); box-shadow: 10px 0 40px #123c2829; }
+  #main-sidebar .brand { font-size: 23px; padding-right: 32px; gap: 8px; }
+  .mobile-menu-close { display: grid; place-items: center; position: absolute; top: 18px; right: 5px; font-size: 25px; }
+  .menu-backdrop { display: block; position: fixed; inset: 0; z-index: 70; background: #10291d66; }
+  #main-sidebar .workspace-label { display: flex; margin: 28px 0 30px; }
+  #main-sidebar .nav-caption { display: block; }
+  #main-sidebar .main-nav, #main-sidebar .tools-nav { display: grid; grid-template-columns: 1fr; gap: 5px; }
+  #main-sidebar .nav-item { min-height: 44px; width: 100%; padding: 12px 13px; gap: 11px; font-size: 12px; white-space: normal; justify-content: flex-start; flex: none; }
+  #main-sidebar .nav-item > span:nth-child(2) { position: static; width: auto; height: auto; padding: 0; margin: 0; overflow: visible; clip: auto; white-space: normal; }
+  #main-sidebar .nav-item svg { width: 18px; height: 18px; }
+  #main-sidebar .nav-count { margin-left: auto; }
+  #main-sidebar #open-chat { background: transparent; }
+  #main-sidebar .sidebar-bottom { display: none; }
+}

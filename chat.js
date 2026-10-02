@@ -73,11 +73,11 @@
     if (focus && !busy) $('#chat-input').focus();
     $('#chat-history').scrollTop = $('#chat-history').scrollHeight;
   }
-  function minimize() {
+  function minimize(focus = true) {
     dialog.hidden = true;
     $('#restore-chat').hidden = false;
     $('#restore-chat').setAttribute('aria-expanded','false');
-    $('#restore-chat').focus({preventScroll:true});
+    if (focus) $('#restore-chat').focus({preventScroll:true});
   }
   $('#close-chat').onclick = minimize;
   $('#restore-chat').onclick = () => expand(true);
@@ -115,7 +115,8 @@
       context = options;
       try { pending = JSON.parse(sessionStorage.getItem('moneyrestly.chat.pending.'+options.userId) || 'null'); } catch { pending = null; }
       $('#chat-input').value = pending?.text || '';
-      expand(); await refresh(); if (context === options && focus && !dialog.hidden) $('#chat-input').focus();
+      if (!focus && matchMedia('(max-width: 760px)').matches) minimize(false); else expand();
+      await refresh(); if (context === options && focus && !dialog.hidden) $('#chat-input').focus();
     }
   });
 })();

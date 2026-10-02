@@ -25,7 +25,7 @@
     },
     {
       title: 'Organize seus gastos conversando.',
-      description: 'O chat já fica aberto no canto inferior. Escreva uma compra ou peça um relatório. Ele salva na sua conta e pergunta se faltar algo. Use o botão − para minimizar e a barra da conversa para reabrir.',
+      description: 'No celular, toque na barra da conversa para abrir o chat. No computador, ele já começa aberto. Escreva uma compra ou peça um relatório. Ele salva na sua conta e pergunta se faltar algo. Use − para minimizar.',
       preview: '<div class="tour-chat-example"><div class="tour-chat-heading">MoneyRestly <span>−</span></div><p class="tour-chat-user">Gastei 85,90 no mercado via Pix</p><p class="tour-chat-answer">✓ Registrei em Mercado.<br>Você pode pedir um relatório ou desfazer.</p><small>Uma mensagem. Tudo organizado.</small></div>'
     },
     {

@@ -470,7 +470,7 @@
   $('#cancel-category').onclick = () => { categoryFields.hidden = true; $('#new-category-name').value = ''; $('#expense-category').focus(); };
   $('#new-category-name').addEventListener('keydown',(event) => { if (event.key === 'Enter') { event.preventDefault(); $('#create-category').click(); } });
   $$('[data-view]').forEach((button) => button.addEventListener('click',() => mutatePreferences({view:button.dataset.view})));
-  $('.brand').addEventListener('click',(event) => { event.preventDefault(); mutatePreferences({view:'overview'}); });
+  $$('.brand').forEach(brand => brand.addEventListener('click',(event) => { event.preventDefault(); mutatePreferences({view:'overview'}); }));
   $('#add-expense').onclick = () => openExpense();
   $('#empty-add').onclick = () => $('#empty-add').dataset.clear === 'true' ? mutatePreferences({category:'all',search:'',page:1}) : openExpense();
   $('#set-budget').onclick = () => openBudget();
@@ -596,6 +596,7 @@
     $('#reset-submit').textContent = busy ? 'Aguarde…' : 'Salvar nova senha →';
   }
   function lockAccount(message = '') {
+    window.MoneyRestlyMenu.reset();
     window.MoneyRestlyChat.reset();
     authGeneration++;
     clearInterval(syncInterval);
@@ -615,6 +616,7 @@
     $('#login-username').focus();
   }
   async function enterAccount(session) {
+    window.MoneyRestlyMenu.reset();
     window.MoneyRestlyChat.reset();
     const generation = ++authGeneration;
     accountStore?.close(); clearInterval(syncInterval);
